@@ -7,9 +7,12 @@
 #define ARM_INTERPOLATION_DT    0.001f
 #define ARM_EPSILON             0.0001f
 #define ARM_MOVE_TIME           1.0f
+#if USE_FK
 #define ARM_Debug_MOVE_TIME     6.0f
+#endif
+#if USE_IK
 #define ARM_Pos_Debug_MOVE_TIME 30.0f
-#define ARM_MOVE_SKY_TIME       2.0f
+#endif
 
 //五次多项式轨迹参数(归一化时间域 t∈[0,1],末速度/末加速度固定为0)
 //起始速度 s'(0) 与起始加速度 s''(0) 可配置;取0时为平滑起步(等价smoothstep)
@@ -18,57 +21,82 @@
 
 Arm_Pose_t Arm_Pose_Table[ARM_STATE_COUNT] =
 {
-    [ARM_STATE_NONE]      = {ARM_U1_START_POS,    ARM_U2_START_POS,    ARM_DJ_START_POS,    ARM_Debug_MOVE_TIME},
-    [ARM_STATE_READY]     = {ARM_U1_READY_POS,    ARM_U2_READY_POS,    ARM_DJ_READY_POS,    ARM_MOVE_TIME},
-    [ARM_STATE_LOW]       = {ARM_U1_LOW_POS,      ARM_U2_LOW_POS,      ARM_DJ_LOW_POS,      ARM_MOVE_TIME},
-    [ARM_STATE_MID]       = {ARM_U1_MID_POS,      ARM_U2_MID_POS,      ARM_DJ_MID_POS,      ARM_MOVE_TIME},
-    [ARM_STATE_SKY]       = {ARM_U1_SKY_POS,      ARM_U2_SKY_POS,      ARM_DJ_SKY_POS,      ARM_MOVE_TIME},
-    [ARM_STATE_KEEP]      = {ARM_U1_KEEP_POS,     ARM_U2_KEEP_POS,     ARM_DJ_KEEP_POS,     ARM_MOVE_TIME},
-    [ARM_STATE_SKY_READY] = {ARM_U1_SKY_READY_POS,ARM_U2_SKY_READY_POS,ARM_DJ_SKY_READY_POS,ARM_MOVE_TIME},
-    [ARM_STATE_LOW1]      = {ARM_U1_LOW1_POS,     ARM_U2_LOW1_POS,     ARM_DJ_LOW1_POS,     ARM_MOVE_TIME},
-    [ARM_STATE_MID1]      = {ARM_U1_MID1_POS,     ARM_U2_MID1_POS,     ARM_DJ_MID1_POS,     ARM_MOVE_TIME},
-    [ARM_STATE_HIGH]      = {ARM_U1_HIGH_POS,     ARM_U2_HIGH_POS,     ARM_DJ_HIGH_POS,     ARM_MOVE_SKY_TIME},
-    // 三个调试状态：占位，运行时由 Arm_Refresh_Debug_Pose() 写回
-    [ARM_DEBUG]           = {0.0f, 0.0f, 0.0f, ARM_Debug_MOVE_TIME},
-    [ARM_Pos_DEBUG]       = {0.0f, 0.0f, 0.0f, ARM_Pos_Debug_MOVE_TIME},
-    [ARM_CartPos_DEBUG]   = {0.0f, 0.0f, 0.0f, ARM_Pos_Debug_MOVE_TIME},
+    // 新机构位姿待实测标定,四台电机目标值先全部给 0
+    [ARM_STATE_SILENT]          = {0.0f, 0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
+    [ARM_STATE_SKY_PRE_H]       = {0.0f, 0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
+    [ARM_STATE_SKY_PRE_V]       = {0.0f, 0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
+    [ARM_STATE_SKY_PICK_H]      = {0.0f, 0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
+    [ARM_STATE_SKY_PICK_V]      = {0.0f, 0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
+    [ARM_STATE_SKY_KEEP_CW90]   = {0.0f, 0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
+    [ARM_STATE_SKY_KEEP_CW180]  = {0.0f, 0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
+    [ARM_STATE_SKY_KEEP_CCW90]  = {0.0f, 0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
+    [ARM_STATE_SKY_KEEP_CCW180] = {0.0f, 0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
+    [ARM_STATE_SKY_PLACE]       = {0.0f, 0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
+    [ARM_STATE_BALL_PRE]        = {0.0f, 0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
+    [ARM_STATE_BALL_PICK]       = {0.0f, 0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
+    [ARM_STATE_BALL_PLACE]      = {0.0f, 0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
+#if USE_FK
+    // 调试状态：占位，运行时由 Arm_Refresh_Debug_Pose() 写回
+    [ARM_DEBUG]           = {0.0f, 0.0f, 0.0f, 0.0f, ARM_Debug_MOVE_TIME},
+#endif
+#if USE_IK
+    [ARM_Pos_DEBUG]       = {0.0f, 0.0f, 0.0f, 0.0f, ARM_Pos_Debug_MOVE_TIME},
+#endif
+#if (USE_FK && USE_IK)
+    [ARM_CartPos_DEBUG]   = {0.0f, 0.0f, 0.0f, 0.0f, ARM_Pos_Debug_MOVE_TIME},
+#endif
 };
 
-//把三个调试状态的动态目标值写回配置表(非调试状态直接返回)
+#if (USE_FK || USE_IK)
+//把调试状态的动态目标值写回配置表(非调试状态直接返回)
 static void Arm_Refresh_Debug_Pose(ArmState_t state)
 {
-    if (state != ARM_DEBUG &&
-        state != ARM_Pos_DEBUG &&
-        state != ARM_CartPos_DEBUG)
+#if USE_FK
+    if (state == ARM_DEBUG)
     {
-        return;
+        Arm_Pose_Table[ARM_DEBUG].u1 = Arm_Debug.u1_target;
+        Arm_Pose_Table[ARM_DEBUG].rotary_z1 = Arm_Debug.rotary_z1_target;
+        Arm_Pose_Table[ARM_DEBUG].prismatic_z1 = Arm_Debug.prismatic_z1_target;
+        Arm_Pose_Table[ARM_DEBUG].dj = Arm_Debug.dj_target;
+        Arm_Pose_Table[ARM_DEBUG].move_time = Arm_Debug.move_time;
     }
+#endif
 
-    Arm_Pose_Table[ARM_DEBUG].u1 = Arm_Debug.u1_target;
-    Arm_Pose_Table[ARM_DEBUG].u2 = Arm_Debug.u2_target;
-    Arm_Pose_Table[ARM_DEBUG].dj = Arm_Debug.dj_target;
-    Arm_Pose_Table[ARM_DEBUG].move_time = Arm_Debug.move_time;
+#if USE_IK
+    if (state == ARM_Pos_DEBUG)
+    {
+        Vec2 p = {Arm_Pos_Debug.x, Arm_Pos_Debug.y};
+        Unitree_Theta_t th = Inverse(p);                 // 关节角（非笛卡尔）
+        Arm_Pose_Table[ARM_Pos_DEBUG].u1 = th.u1_theta;
+        Arm_Pose_Table[ARM_Pos_DEBUG].rotary_z1 = RAD2DEG(th.u2_theta); // TODO 第二关节暂按 GIM4310 映射,待标定
+        Arm_Pose_Table[ARM_Pos_DEBUG].dj = Arm_Pos_Debug.dj_target;
+        Arm_Pose_Table[ARM_Pos_DEBUG].move_time = Arm_Pos_Debug.move_time;
+    }
+#endif
 
-    Vec2 p = {Arm_Pos_Debug.x, Arm_Pos_Debug.y};
-    Unitree_Theta_t th = Inverse(p);                 // 关节角（非笛卡尔）
-    Arm_Pose_Table[ARM_Pos_DEBUG].u1 = th.u1_theta;
-    Arm_Pose_Table[ARM_Pos_DEBUG].u2 = th.u2_theta;
-    Arm_Pose_Table[ARM_Pos_DEBUG].dj = Arm_Pos_Debug.dj_target;
-    Arm_Pose_Table[ARM_Pos_DEBUG].move_time = Arm_Pos_Debug.move_time;
-
-    // 笛卡尔状态：u1/u2 由 x/y 轨迹覆盖，仅写 dj 与时长
-    Arm_Pose_Table[ARM_CartPos_DEBUG].dj = Arm_Pos_Debug.dj_target;
-    Arm_Pose_Table[ARM_CartPos_DEBUG].move_time = Arm_Pos_Debug.move_time;
+#if (USE_FK && USE_IK)
+    if (state == ARM_CartPos_DEBUG)
+    {
+        // 笛卡尔状态：u1/rotary_z1 由 x/y 轨迹覆盖，仅写 dj 与时长
+        Arm_Pose_Table[ARM_CartPos_DEBUG].dj = Arm_Pos_Debug.dj_target;
+        Arm_Pose_Table[ARM_CartPos_DEBUG].move_time = Arm_Pos_Debug.move_time;
+    }
+#endif
 }
+#endif /* (USE_FK || USE_IK) */
 
-volatile uint8_t level_flag=1;
-volatile uint8_t Is_open=0;
 volatile uint8_t Is_ok=0;
 
 ArmControl_t ArmControl;
-Arm_Interpolation_t Arm_Debug={0,0,0,ARM_Debug_MOVE_TIME};
+#if USE_FK
+Arm_Interpolation_t Arm_Debug={0,0,0,0,ARM_Debug_MOVE_TIME};
+#endif
+#if USE_IK
 Arm_Interpolation_Pos_t Arm_Pos_Debug={0,0,0,ARM_Pos_Debug_MOVE_TIME};
+#endif
+#if (USE_FK || USE_IK)
 Arm_Kinetics_Data_t Arm_Kinetics_Data={0};
+#endif
 
 
 
@@ -150,14 +178,15 @@ static float Target_Quintic_Interpolation(float start_angle, float target,
 //开始轨迹计算
 static void Arm_Interpolation_Start(Arm_Pose_t pose)
 {
-    ArmControl.pose = pose;                              // 更新状态配置（电机1/2/3 + 运行时间）
-
+    ArmControl.pose = pose;                              // 更新状态配置（四台电机 + 运行时间）
     ArmControl.traj.ctrl.u1_start = ArmControl.arm_motor.RotaryU1->data.position;
-    ArmControl.traj.ctrl.u2_start = ArmControl.arm_motor.U2->data.position;
+    ArmControl.traj.ctrl.rotary_z1_start = ArmControl.arm_motor.RotaryZ1->valReal.pos_deg;
+    ArmControl.traj.ctrl.prismatic_z1_start = ArmControl.arm_motor.PrismaticZ1->valReal.pos_deg;
     ArmControl.traj.ctrl.dj_start = ArmControl.arm_motor.RotaryDJ->valNow.angle_deg;
 
     ArmControl.traj.ctrl.u1_target = pose.u1;
-    ArmControl.traj.ctrl.u2_target = pose.u2;
+    ArmControl.traj.ctrl.rotary_z1_target = pose.rotary_z1;
+    ArmControl.traj.ctrl.prismatic_z1_target = pose.prismatic_z1;
     ArmControl.traj.ctrl.dj_target = pose.dj;
 
     ArmControl.traj.ctrl.time       = 0.0f;
@@ -169,10 +198,11 @@ static void Arm_Interpolation_Start(Arm_Pose_t pose)
 }
 
 
+#if (USE_FK && USE_IK)
 static void Arm_Interpolation_Cart_Start(Arm_Pose_t pose, float x, float y)
 {
     Unitree_Theta_t now = {ArmControl.arm_motor.RotaryU1->data.position,
-                           ArmControl.arm_motor.U2->data.position};
+                           DEG2RAD(ArmControl.arm_motor.RotaryZ1->valReal.pos_deg)}; // TODO 第二关节暂按 GIM4310
     Vec2 now_pos = Forward(now);                       // 起点 = 当前真实末端
 
     ArmControl.pose = pose;                            // dj + move_time 来自表
@@ -190,6 +220,8 @@ static void Arm_Interpolation_Cart_Start(Arm_Pose_t pose, float x, float y)
 
     /* 不在此置 running/finish —— 由 Arm_Func 依据目标坐标变化沿决定 */
 }
+#endif /* (USE_FK && USE_IK) */
+
 
 //轨迹点更新
 static void Arm_Interpolation_Update(void)
@@ -198,11 +230,12 @@ static void Arm_Interpolation_Update(void)
     {
         return ;
     }
-    
+
+#if (USE_FK && USE_IK)
     float s = Quintic_S(ArmControl.traj.ctrl.time, ArmControl.traj.ctrl.total_time);
+
     if (ArmControl.traj.mode==ARM_MODE_CARTESIAN)
     {
-
         Vec2 p;
         p.x = ArmControl.traj.ctrl.start_x
             + (ArmControl.traj.ctrl.target_x - ArmControl.traj.ctrl.start_x) * s;
@@ -221,16 +254,17 @@ static void Arm_Interpolation_Update(void)
 
         Unitree_Theta_t th = Inverse(p);
         ArmControl.arm_motor.RotaryU1->cmd.position = th.u1_theta;
-        ArmControl.arm_motor.U2->cmd.position = th.u2_theta;
+        ArmControl.arm_motor.RotaryZ1->valSetNow.pos_deg = RAD2DEG(th.u2_theta); // TODO 第二关节暂按 GIM4310,待标定
         ArmControl.arm_motor.RotaryDJ->valSet.angle_deg = ArmControl.traj.ctrl.dj_start
             + (ArmControl.traj.ctrl.dj_target - ArmControl.traj.ctrl.dj_start) * s;
     }
-
     else
+#endif
     {
-    ArmControl.arm_motor.RotaryU1->cmd.position =Target_Quintic_Interpolation(ArmControl.traj.ctrl.u1_start,ArmControl.traj.ctrl.u1_target,ArmControl.traj.ctrl.time,ArmControl.traj.ctrl.total_time);
-    ArmControl.arm_motor.U2->cmd.position = Target_Quintic_Interpolation(ArmControl.traj.ctrl.u2_start,ArmControl.traj.ctrl.u2_target,ArmControl.traj.ctrl.time,ArmControl.traj.ctrl.total_time);
-    ArmControl.arm_motor.RotaryDJ->valSet.angle_deg =  Target_Quintic_Interpolation(ArmControl.traj.ctrl.dj_start,ArmControl.traj.ctrl.dj_target,ArmControl.traj.ctrl.time,ArmControl.traj.ctrl.total_time);
+        ArmControl.arm_motor.RotaryU1->cmd.position = Target_Quintic_Interpolation(ArmControl.traj.ctrl.u1_start,ArmControl.traj.ctrl.u1_target,ArmControl.traj.ctrl.time,ArmControl.traj.ctrl.total_time);
+        ArmControl.arm_motor.RotaryZ1->valSetNow.pos_deg = Target_Quintic_Interpolation(ArmControl.traj.ctrl.rotary_z1_start,ArmControl.traj.ctrl.rotary_z1_target,ArmControl.traj.ctrl.time,ArmControl.traj.ctrl.total_time);
+        ArmControl.arm_motor.PrismaticZ1->valSetNow.pos_deg = Target_Quintic_Interpolation(ArmControl.traj.ctrl.prismatic_z1_start,ArmControl.traj.ctrl.prismatic_z1_target,ArmControl.traj.ctrl.time,ArmControl.traj.ctrl.total_time);
+        ArmControl.arm_motor.RotaryDJ->valSet.angle_deg = Target_Quintic_Interpolation(ArmControl.traj.ctrl.dj_start,ArmControl.traj.ctrl.dj_target,ArmControl.traj.ctrl.time,ArmControl.traj.ctrl.total_time);
     }
 
     ArmControl.traj.ctrl.time += ArmControl.traj.ctrl.dt;
@@ -238,6 +272,7 @@ static void Arm_Interpolation_Update(void)
     if (ArmControl.traj.ctrl.time >= ArmControl.traj.ctrl.total_time)
     {
         ArmControl.traj.ctrl.time = ArmControl.traj.ctrl.total_time;
+#if (USE_FK && USE_IK)
         if (ArmControl.traj.mode==ARM_MODE_CARTESIAN)
         {
             Vec2 p_end;
@@ -245,11 +280,14 @@ static void Arm_Interpolation_Update(void)
             p_end.y = ArmControl.traj.ctrl.target_y;
             Unitree_Theta_t last = Inverse(p_end);
             ArmControl.arm_motor.RotaryU1->cmd.position = last.u1_theta;
-            ArmControl.arm_motor.U2->cmd.position = last.u2_theta;
+            ArmControl.arm_motor.RotaryZ1->valSetNow.pos_deg = RAD2DEG(last.u2_theta); // TODO 第二关节暂按 GIM4310,待标定
         }
-        else{
-        ArmControl.arm_motor.RotaryU1->cmd.position = ArmControl.traj.ctrl.u1_target;
-        ArmControl.arm_motor.U2->cmd.position = ArmControl.traj.ctrl.u2_target;
+        else
+#endif
+        {
+            ArmControl.arm_motor.RotaryU1->cmd.position = ArmControl.traj.ctrl.u1_target;
+            ArmControl.arm_motor.RotaryZ1->valSetNow.pos_deg = ArmControl.traj.ctrl.rotary_z1_target;
+            ArmControl.arm_motor.PrismaticZ1->valSetNow.pos_deg = ArmControl.traj.ctrl.prismatic_z1_target;
         }
         ArmControl.arm_motor.RotaryDJ->valSet.angle_deg = ArmControl.traj.ctrl.dj_target;
         ArmControl.running = false;
@@ -270,35 +308,49 @@ void Arm_Control_Init(void)
 
     ArmControl.enable    = false;
     ArmControl.reset     = false;
-    ArmControl.state     = ARM_STATE_NONE;
-    ArmControl.req_state = ARM_STATE_NONE;
+    ArmControl.state     = ARM_STATE_SILENT;
+    ArmControl.req_state = ARM_STATE_SILENT;
 
-    ArmControl.pose = Arm_Pose_Table[ARM_STATE_NONE];
+    ArmControl.pose = Arm_Pose_Table[ARM_STATE_SILENT];
 
     ArmControl.traj.mode = ARM_MODE_DEFAULT;
 
     ArmControl.traj.ctrl.u1_start = 0.0f;
-    ArmControl.traj.ctrl.u2_start = 0.0f;
+    ArmControl.traj.ctrl.rotary_z1_start = 0.0f;
+    ArmControl.traj.ctrl.prismatic_z1_start = 0.0f;
     ArmControl.traj.ctrl.dj_start = 0.0f;
 
-    //目标值与初始状态(NONE)配置一致,保证首次非NONE命令能触发目标变化沿
-    ArmControl.traj.ctrl.u1_target = Arm_Pose_Table[ARM_STATE_NONE].u1;
-    ArmControl.traj.ctrl.u2_target = Arm_Pose_Table[ARM_STATE_NONE].u2;
-    ArmControl.traj.ctrl.dj_target = Arm_Pose_Table[ARM_STATE_NONE].dj;
+    //目标值与初始状态(SILENT)配置一致,保证首次非SILENT命令能触发目标变化沿
+    ArmControl.traj.ctrl.u1_target = Arm_Pose_Table[ARM_STATE_SILENT].u1;
+    ArmControl.traj.ctrl.rotary_z1_target = Arm_Pose_Table[ARM_STATE_SILENT].rotary_z1;
+    ArmControl.traj.ctrl.prismatic_z1_target = Arm_Pose_Table[ARM_STATE_SILENT].prismatic_z1;
+    ArmControl.traj.ctrl.dj_target = Arm_Pose_Table[ARM_STATE_SILENT].dj;
 
     ArmControl.traj.ctrl.time       = 0.0f;
-    ArmControl.traj.ctrl.total_time = ARM_Pos_Debug_MOVE_TIME;
+    ArmControl.traj.ctrl.total_time = ARM_MOVE_TIME;
     ArmControl.traj.ctrl.dt         = ARM_INTERPOLATION_DT;
 
+#if (USE_FK && USE_IK)
     ArmControl.traj.ctrl.start_x  = 0.0f;
     ArmControl.traj.ctrl.start_y  = 0.0f;
     ArmControl.traj.ctrl.target_x = 0.0f;
     ArmControl.traj.ctrl.target_y = 0.0f;
+#endif
 
     ArmControl.running = false;
     ArmControl.finish  = true;   //防止上电后立刻乱动
 }
 
+
+
+/* 持天空块状态判断:4 个持块状态仅 GIM4310 的旋转角度不同 */
+static bool Arm_Is_SkyKeep_State(ArmState_t state)
+{
+    return (state == ARM_STATE_SKY_KEEP_CW90) ||
+           (state == ARM_STATE_SKY_KEEP_CW180) ||
+           (state == ARM_STATE_SKY_KEEP_CCW90) ||
+           (state == ARM_STATE_SKY_KEEP_CCW180);
+}
 
 
 //机械臂运动更新(1kHz,运行于TIM2中断)
@@ -310,7 +362,8 @@ void Arm_Func(void)
 
     /* 0) 未完成初始化(电机引用为空)直接返回:TIM2在Arm_Control_Init之前就已启动 */
     if (ArmControl.arm_motor.RotaryU1 == NULL ||
-        ArmControl.arm_motor.U2 == NULL ||
+        ArmControl.arm_motor.RotaryZ1 == NULL ||
+        ArmControl.arm_motor.PrismaticZ1 == NULL ||
         ArmControl.arm_motor.RotaryDJ == NULL)
     {
         return;
@@ -346,64 +399,61 @@ void Arm_Func(void)
     {
         return;
     }
-    Arm_Pose_t pose={0,0,0,30};
     bool target_changed = false;
-    /* 3) 模式切换变化沿检测 */
+
+    /* 3) 模式切换变化沿检测:新状态目标与当前目标不同才重新规划 */
     if (ArmControl.req_state != ArmControl.state)
     {
-        
-        
+        Arm_Pose_t pose;
+        ArmState_t last_state = ArmControl.state;
 
         ArmControl.state = ArmControl.req_state;
-    
+
+        /* 放置天空块:先修改配置表,再读取 pose —— 沿用上一个持块状态的 GIM4310 旋转角度 */
+        if ((ArmControl.state == ARM_STATE_SKY_PLACE) && Arm_Is_SkyKeep_State(last_state))
+        {
+            Arm_Pose_Table[ARM_STATE_SKY_PLACE].rotary_z1 = Arm_Pose_Table[last_state].rotary_z1;
+        }
+
+#if (USE_FK || USE_IK)
         Arm_Refresh_Debug_Pose(ArmControl.state);      //调试状态目标值动态写回配置表
+#endif
 
         pose = Arm_Pose_Table[ArmControl.state];
 
+#if (USE_FK && USE_IK)
         if (ArmControl.state == ARM_CartPos_DEBUG)
         {
-            Arm_Interpolation_Cart_Start(pose, Arm_Pos_Debug.x, Arm_Pos_Debug.y);
             //笛卡尔模式:末端目标坐标发生改变才启动
+            target_changed = (ArmControl.traj.ctrl.target_x != Arm_Pos_Debug.x) ||
+                             (ArmControl.traj.ctrl.target_y != Arm_Pos_Debug.y);
+            if (target_changed)
+            {
+                Arm_Interpolation_Cart_Start(pose, Arm_Pos_Debug.x, Arm_Pos_Debug.y);
+            }
         }
         else
+#endif
         {
-            //默认模式:三个电机转角目标值发生改变才启动
-            Arm_Interpolation_Start(pose);
+            //默认模式:四台电机转角目标值发生改变才启动
+            target_changed = (ArmControl.traj.ctrl.u1_target != pose.u1) ||
+                             (ArmControl.traj.ctrl.rotary_z1_target != pose.rotary_z1) ||
+                             (ArmControl.traj.ctrl.prismatic_z1_target != pose.prismatic_z1) ||
+                             (ArmControl.traj.ctrl.dj_target != pose.dj);
+            if (target_changed)
+            {
+                Arm_Interpolation_Start(pose);//上位机可直接传pose实时控制
+            }
         }
     }
-        if(ArmControl.state == ARM_CartPos_DEBUG)
-        {
-        target_changed = (ArmControl.traj.ctrl.target_x != Arm_Pos_Debug.x) ||
-        (ArmControl.traj.ctrl.target_y != Arm_Pos_Debug.y);
-        }
-        else
-        {
-        target_changed = (ArmControl.traj.ctrl.u1_target != pose.u1) ||
-                            (ArmControl.traj.ctrl.u2_target != pose.u2) ||
-                            (ArmControl.traj.ctrl.dj_target != pose.dj);
-        }
-        if (target_changed)
-        {
-            ArmControl.traj.ctrl.time = 0.0f;           //重置已运行的时间
-            ArmControl.running = true;
-            ArmControl.finish  = false;
-            target_changed=0;
-            if(ArmControl.state == ARM_CartPos_DEBUG)
-            {
-            Arm_Pos_Debug.x=ArmControl.traj.ctrl.target_x;
-            Arm_Pos_Debug.y=ArmControl.traj.ctrl.target_y;
-            Arm_Interpolation_Cart_Start(pose, Arm_Pos_Debug.x, Arm_Pos_Debug.y);
 
-            }
-            else
-            {
-            pose.u1=ArmControl.traj.ctrl.u1_target;
-            pose.u2=ArmControl.traj.ctrl.u2_target;
-            pose.dj=ArmControl.traj.ctrl.dj_target;
-            Arm_Interpolation_Start(pose);
-            }
-        }
-    
+    if (target_changed)
+    {
+        //目标变化:重新计时,以当前实际位置为起点运动到新目标
+        ArmControl.traj.ctrl.time = 0.0f;
+        ArmControl.running = true;
+        ArmControl.finish  = false;
+    }
 
     /* 4) 运动更新 */
     if (ArmControl.running)
@@ -411,17 +461,20 @@ void Arm_Func(void)
         Arm_Interpolation_Update();
     }
 
+#if USE_FK
     /* 运动学遥测(1kHz刷新,供VOFA/调试器观察) */
     Arm_Kinetics_Data.motor_target = Arm_Debug;
     Arm_Kinetics_Data.arm_angle.Angle1 = U1_Motor2Geom(ArmControl.arm_motor.RotaryU1->data.position);
-    Arm_Kinetics_Data.arm_angle.Angle2 = U2_Motor2Geom(ArmControl.arm_motor.RotaryU1->data.position,ArmControl.arm_motor.U2->data.position);
+    Arm_Kinetics_Data.arm_angle.Angle2 = U2_Motor2Geom(ArmControl.arm_motor.RotaryU1->data.position,
+                                                       DEG2RAD(ArmControl.arm_motor.RotaryZ1->valReal.pos_deg)); // TODO 第二关节暂按 GIM4310
     Arm_Kinetics_Data.forward_angle.u1_theta = ArmControl.arm_motor.RotaryU1->data.position;
-    Arm_Kinetics_Data.forward_angle.u2_theta = ArmControl.arm_motor.U2->data.position;
+    Arm_Kinetics_Data.forward_angle.u2_theta = DEG2RAD(ArmControl.arm_motor.RotaryZ1->valReal.pos_deg); // TODO 第二关节暂按 GIM4310
     Arm_Kinetics_Data.end_coordinate = Forward(Arm_Kinetics_Data.forward_angle);
+#endif
+#if (USE_FK && USE_IK)
     Arm_Kinetics_Data.inverse_angle = Inverse(Arm_Kinetics_Data.end_coordinate);
+#endif
 }
-
-
 
 
 
@@ -436,7 +489,6 @@ void Arm_Motor_Enable(void)
     ArmControl.arm_motor.RotaryU1->enable = true;
 
     ArmControl.arm_motor.RotaryDJ->Begin = true;
-
     ArmControl.arm_motor.RotaryDJ->MODE_Set = DJ_Position;
 
     ArmControl.arm_motor.PrismaticZ1->Begin=true;
@@ -453,56 +505,40 @@ void Arm_Motor_Enable(void)
 void Arm_Motor_Disable(void)
 {
     ArmControl.arm_motor.RotaryU1->enable = false;
-    ArmControl.arm_motor.U2->enable = false;
+
     ArmControl.arm_motor.RotaryDJ->MODE_Set = DJ_Disable;
     ArmControl.arm_motor.RotaryDJ->Begin = false;
 
+    ArmControl.arm_motor.RotaryZ1->mode = Zdrive_Disable;
+    ArmControl.arm_motor.PrismaticZ1->mode = Zdrive_Disable;
 }
 
 
-//取块目标状态映射(按层数)
-static ArmState_t Arm_Pick_State(uint8_t level)
+//状态命令表:主控板下发 CANID -> 机械臂请求状态
+//CANID 未分配(宏值为 0)的条目自动跳过
+static const struct
 {
-    switch (level)
-    {
-        case 0:
-            return ARM_STATE_SKY;
-
-        case 1:
-            return ARM_STATE_LOW;
-
-        case 2:
-            return ARM_STATE_MID;
-
-        default:
-            return ARM_STATE_MID;
-    }
-}
-
-//放块准备目标状态映射(按层数)
-static ArmState_t Arm_Place_State(uint8_t level)
+    uint32_t   can_id;
+    ArmState_t state;
+}s_arm_state_canid_map[] =
 {
-    switch (level)
-    {
-        case 0:
-            return ARM_STATE_SKY_READY;
-
-        case 1:
-            return ARM_STATE_LOW1;
-
-        case 2:
-            return ARM_STATE_MID1;
-
-        case 3:
-            return ARM_STATE_HIGH;
-
-        default:
-            return ARM_STATE_LOW1;
-    }
-}
+    {ARM_CANID_STATE_SILENT,         ARM_STATE_SILENT},
+    {ARM_CANID_STATE_SKY_PRE_H,      ARM_STATE_SKY_PRE_H},
+    {ARM_CANID_STATE_SKY_PRE_V,      ARM_STATE_SKY_PRE_V},
+    {ARM_CANID_STATE_SKY_PICK_H,     ARM_STATE_SKY_PICK_H},
+    {ARM_CANID_STATE_SKY_PICK_V,     ARM_STATE_SKY_PICK_V},
+    {ARM_CANID_STATE_SKY_KEEP_CW90,  ARM_STATE_SKY_KEEP_CW90},
+    {ARM_CANID_STATE_SKY_KEEP_CW180, ARM_STATE_SKY_KEEP_CW180},
+    {ARM_CANID_STATE_SKY_KEEP_CCW90, ARM_STATE_SKY_KEEP_CCW90},
+    {ARM_CANID_STATE_SKY_KEEP_CCW180,ARM_STATE_SKY_KEEP_CCW180},
+    {ARM_CANID_STATE_SKY_PLACE,      ARM_STATE_SKY_PLACE},
+    {ARM_CANID_STATE_BALL_PRE,       ARM_STATE_BALL_PRE},
+    {ARM_CANID_STATE_BALL_PICK,      ARM_STATE_BALL_PICK},
+    {ARM_CANID_STATE_BALL_PLACE,     ARM_STATE_BALL_PLACE},
+};
 
 
-//上位机命令接收(FDCAN中断):直接置请求状态/使能/复位,由Arm_Func完成变化沿处理
+//上位机命令接收(FDCAN中断):判断接收的CANID得到对应的请求状态,由Arm_Func完成变化沿处理
 void Arm_Receive(FDCAN_RxHeaderTypeDef Rxheader, uint8_t *Rx_data)
 {
     if (Rxheader.IdType != FDCAN_EXTENDED_ID)
@@ -514,7 +550,7 @@ void Arm_Receive(FDCAN_RxHeaderTypeDef Rxheader, uint8_t *Rx_data)
     switch (Rxheader.Identifier)
     {
         //使能失能
-        case 0x01020211U:
+        case ARM_CANID_ENABLE:
 
             if (Rx_data[0] == 'E')
             {
@@ -523,13 +559,12 @@ void Arm_Receive(FDCAN_RxHeaderTypeDef Rxheader, uint8_t *Rx_data)
             else if (Rx_data[0] == 'D')
             {
                 ArmControl.enable = false;
-                Is_open = 0U;
             }
 
             break;
 
         //系统复位
-        case 0x010202F0U:
+        case ARM_CANID_RESET:
 
             if (Rx_data[0] == 'R')
             {
@@ -548,105 +583,15 @@ void Arm_Receive(FDCAN_RxHeaderTypeDef Rxheader, uint8_t *Rx_data)
         return;
     }
 
-    switch (Rxheader.Identifier)
+    //状态命令:CANID 命中即置请求状态
+    for (uint32_t i = 0U; i < (sizeof(s_arm_state_canid_map) / sizeof(s_arm_state_canid_map[0])); i++)
     {
-        //位置调节(层数)
-        case 0x01020002U:
-
-            if (Rx_data[0] <= 3U)
-            {
-                level_flag = Rx_data[0];
-            }
-
+        if ((s_arm_state_canid_map[i].can_id != 0U) &&
+            (Rxheader.Identifier == s_arm_state_canid_map[i].can_id))
+        {
+            ArmControl.req_state = s_arm_state_canid_map[i].state;
             break;
-
-        //启动开始,变为持块状态
-        case 0x010202FFU:
-
-            if (Rx_data[0] == 3)
-            {
-                ArmControl.req_state = ARM_STATE_KEEP;
-            }
-
-            break;
-
-        //返回零位
-        case 0x01020200U:
-
-            if (Rx_data[0] == 3)
-            {
-                ArmControl.req_state = ARM_STATE_NONE;
-                Is_open = 0U;
-            }
-
-            break;
-
-        //取块准备
-        case 0x01020301U:
-
-            if (Rx_data[0] == 'P')
-            {
-                ArmControl.req_state = (level_flag == 0U)
-                                     ? ARM_STATE_SKY_READY
-                                     : ARM_STATE_READY;
-            }
-
-            break;
-
-        //取块开始
-        case 0x01020307U:
-
-            if (Rx_data[0] == 'T')
-            {
-                ArmControl.req_state = Arm_Pick_State(level_flag);
-                Is_open = 1U;
-            }
-
-            break;
-
-        //取块完成
-        case 0x01020309U:
-
-            if (Rx_data[0] == 'H')
-            {
-                ArmControl.req_state = ARM_STATE_KEEP;
-            }
-
-            break;
-
-        //放块准备
-        case 0x01020308U:
-
-            if (Rx_data[0] == 'F')
-            {
-                ArmControl.req_state = Arm_Place_State(level_flag);
-            }
-
-            break;
-
-        //放块开始(松爪,不改状态)
-        case 0x01020305U:
-
-            if (Rx_data[0] == 'R')
-            {
-                Is_open = 0U;
-            }
-
-            break;
-
-        //放块完成
-        case 0x0102030AU:
-
-            if (Rx_data[0] == 'O')
-            {
-                ArmControl.req_state = ARM_STATE_KEEP;
-            }
-
-            break;
-
-        default:
-
-            break;
+        }
     }
 }
 
@@ -672,7 +617,7 @@ void Arm_Transmit(void)
     tx_header.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
     tx_header.MessageMarker = 0;
 
-    tx_data[0] = level_flag;
+    tx_data[0] = (uint8_t)ArmControl.state;
 
 //    if( HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan1,&tx_header,tx_data)!=HAL_OK)
 //    {

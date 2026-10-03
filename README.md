@@ -48,8 +48,10 @@
 4. 电机配置:
    - 开关与数量/总线/减速比:[Config/motor_config.h](Config/motor_config.h)
      (`USE_DJ / USE_VESC / USE_ZMDR / USE_UNITREE` 开关也在这里);
-   - FDCAN2:VESC + ZDrive 第一路;FDCAN3:DJI + ZDrive 第二路(拆分时);FDCAN1:预留给用户;
+   - FDCAN2:VESC + DJI(M2006/M3508);FDCAN3:机械臂 ZDrive(GIM4310、U8Lite);FDCAN1:预留给用户;
      ZDrive 拆分:`MOTOR_ZDRIVE_SPLIT_COUNT` = 0 不拆分,= n 则 ID 1..n 走第一路、其余走第二路。
+   - 机械臂(`User/`)四台电机:Unitree GO-M8010-6(U1)、GIM4310(Zmotor[0])、U8Lite(Zmotor[1])、
+     第 2 台 M3508(DJmotor[1]);Unitree 只装 1 台,状态机见 `User/inc/seize_sky.h`。
 5. 电机默认失能:ZDrive 用驱动自身的 `Zdrive_Disable` 模式(无 Enable 标志),
    初始化完成后置 `Begin = true`,200 Hz 的 Func 会自动完成模式切换并下发控制帧;
    DJI 用 `MODE = DJ_Disable` 失能(协议无 disable 态,发 0 电流);

@@ -1,5 +1,7 @@
 #include "kinematics.h"
 
+#if (USE_FK || USE_IK)
+
 /* ============================================================
  * 二自由度平面机械臂运动学
  *
@@ -8,10 +10,10 @@
  * 才能保持大小臂夹角不变。
  *
  * 角度约定(标定后若符号反了,只需修改下面四个转换函数):
- *   大臂几何角 theta1 = u1 + ARM_U1_ZERO_POS
- *   小臂几何角 theta2 = (u1 - u2) * ARM_U2_RATIO + ARM_U2_ZERO_POS
+ *   大臂几何角: theta1 = u1 + ARM_U1_ZERO_POS
+ *   小臂几何角: theta2 = (u1 + u2) * ARM_U2_RATIO + ARM_U2_ZERO_POS
  *
- *   theta1: 大臂与 +x 轴夹角(方向与 u1 一致)
+ *   theta1: 大臂与 +x 轴夹角,方向与 u1 一致
  *   theta2: 小臂相对大臂的夹角(肘关节角,方向与 u2 相反)
  *
  * 末端坐标(mm):
@@ -19,6 +21,7 @@
  *   y = L1*sin(theta1) + L2*sin(theta1+theta2)
  * ============================================================ */
 
+#if USE_FK
 // 电机角 -> 几何角
 float U1_Motor2Geom(float u1)
 {
@@ -28,18 +31,6 @@ float U1_Motor2Geom(float u1)
 float U2_Motor2Geom(float u1, float u2)
 {
     return ARM_U2_ZERO_POS-(u1 + u2) * ARM_U2_RATIO ;
-}
-
-// 几何角 -> 电机角
-static float U1_Geom2Motor(float theta1)
-{
-    return theta1 - ARM_U1_ZERO_POS;
-}
-
-static float U2_Geom2Motor(float theta1, float theta2)
-{
-    float u1 = U1_Geom2Motor(theta1);
-    return (ARM_U2_ZERO_POS-theta2)/ARM_U2_RATIO-u1;
 }
 
 // 正运动学: 关节电机角 -> 末端坐标(mm)
@@ -53,6 +44,20 @@ Vec2 Forward(Unitree_Theta_t u_theta)
     pos.y = ARM_U1_LENTH * sinf(theta1) + ARM_U2_LENTH * sinf(theta1 + theta2);
 
     return pos;
+}
+#endif /* USE_FK */
+
+#if USE_IK
+// 几何角 -> 电机角
+static float U1_Geom2Motor(float theta1)
+{
+    return theta1 - ARM_U1_ZERO_POS;
+}
+
+static float U2_Geom2Motor(float theta1, float theta2)
+{
+    float u1 = U1_Geom2Motor(theta1);
+    return (ARM_U2_ZERO_POS-theta2)/ARM_U2_RATIO-u1;
 }
 
 // 逆运动学: 末端坐标(mm) -> 关节电机角(rad),取肘部向上解
@@ -81,3 +86,6 @@ Unitree_Theta_t Inverse(Vec2 pos)
 
     return theta;
 }
+#endif /* USE_IK */
+
+#endif /* (USE_FK || USE_IK) */

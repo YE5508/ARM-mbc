@@ -139,7 +139,6 @@ void UnitreeMotor_Init(void)
         Unitree_motors[i].begin = true;
     }
     Unitree_motors[0].zero_pos = ARM_U1_ZERO_POS;
-    Unitree_motors[1].zero_pos = ARM_U2_ZERO_POS;
 
     s_unitree_tx_index = 0U;
     s_unitree_initialized = true;
