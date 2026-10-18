@@ -41,7 +41,9 @@ void VOFA_SendTask(void *argument)
     {   
         static uint8_t Func_cnt = 0;
         Func_cnt++;
+#if APP_VOFA_ENABLE
         VOFA_Channel_Update(0, VOFA_TYPE_FLOAT, (void *)&(Unitree_motors[0].data.position));
+#endif
 #if BT_SERV_ENABLE
         /* 蓝牙业务联调(默认关,BT_SERV_ENABLE=1 开启):
            周期发一条"状态",并把收到的"命令"解析出来。

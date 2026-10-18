@@ -25,9 +25,9 @@ extern "C"
 /* ------------------------------------------------------------------ */
 /* VOFA+打波                                                            */
 /* ------------------------------------------------------------------ */
-#define APP_VOFA_ENABLE 1
+#define APP_VOFA_ENABLE 0 /* UART9 disabled after pin reassignment. */
 #define APP_VOFA_TASK_PERIOD_MS 10U
-#define BOARD_VOFA_UART (huart9) /* VOFA+ debug data output */
+// #define BOARD_VOFA_UART (huart9) /* VOFA+ debug data output */
 /* ------------------------------------------------------------------ */
 /* Bluetooth 协议蓝牙                                                           */
 /* ------------------------------------------------------------------ */

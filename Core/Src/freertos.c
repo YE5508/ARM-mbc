@@ -52,14 +52,14 @@
 osThreadId_t AlarmTaskHandle;
 const osThreadAttr_t AlarmTask_attributes = {
   .name = "AlarmTask",
-  .stack_size = 128 * 4,
+  .stack_size = 64 * 4,
   .priority = (osPriority_t) osPriorityBelowNormal,
 };
 /* Definitions for VOFASendTask */
 osThreadId_t VOFASendTaskHandle;
 const osThreadAttr_t VOFASendTask_attributes = {
   .name = "VOFASendTask",
-  .stack_size = 128 * 4,
+  .stack_size = 64 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 
@@ -105,7 +105,7 @@ void MX_FREERTOS_Init(void) {
   AlarmTaskHandle = osThreadNew(Alarm_Task, NULL, &AlarmTask_attributes);
 
   /* creation of VOFASendTask */
-  // VOFASendTaskHandle = osThreadNew(VOFA_SendTask, NULL, &VOFASendTask_attributes);
+  VOFASendTaskHandle = osThreadNew(VOFA_SendTask, NULL, &VOFASendTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

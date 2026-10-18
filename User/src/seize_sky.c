@@ -6,7 +6,7 @@
 
 #define ARM_INTERPOLATION_DT    0.001f
 #define ARM_EPSILON             0.0001f
-#define ARM_MOVE_TIME           1.0f
+#define ARM_MOVE_TIME           10.f
 #if USE_FK
 #define ARM_Debug_MOVE_TIME     6.0f
 #endif

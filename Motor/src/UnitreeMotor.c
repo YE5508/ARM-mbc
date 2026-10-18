@@ -50,8 +50,8 @@ static UART_HandleTypeDef *UnitreeMotor_GetUart(void)
     return &huart4;
 #elif (MOTOR_UNITREE_UART == 7)
     return &huart7;
-#elif (MOTOR_UNITREE_UART == 9)
-    return &huart9;
+// #elif (MOTOR_UNITREE_UART == 9)
+//     return &huart9;
 #else
     return NULL;
 #endif

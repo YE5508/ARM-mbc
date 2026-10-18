@@ -1,5 +1,7 @@
 #include "vofa.h"
 
+#if APP_VOFA_ENABLE
+
 #define VOFA_PACKET_SIZE (4 * (VOFA_CHANNEL_NUM + 1))
 
 // 调试数据包结构体
@@ -72,3 +74,5 @@ void VOFA_Update(void)
     SCB_CleanDCache_by_Addr((uint32_t *)(sending_vofa_buffer), (VOFA_PACKET_SIZE));
     HAL_UART_Transmit_DMA(&BOARD_VOFA_UART, sending_vofa_buffer, (VOFA_PACKET_SIZE));
 }
+
+#endif /* APP_VOFA_ENABLE */

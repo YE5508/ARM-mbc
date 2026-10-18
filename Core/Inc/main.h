@@ -59,6 +59,12 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define BUZZER_PIN_Pin GPIO_PIN_0
 #define BUZZER_PIN_GPIO_Port GPIOB
+#define ColorSensor2_Pin GPIO_PIN_14
+#define ColorSensor2_GPIO_Port GPIOD
+#define ColorSensor2_EXTI_IRQn EXTI15_10_IRQn
+#define ColorSensor1_Pin GPIO_PIN_15
+#define ColorSensor1_GPIO_Port GPIOD
+#define ColorSensor1_EXTI_IRQn EXTI15_10_IRQn
 #define LED1_PIN_Pin GPIO_PIN_3
 #define LED1_PIN_GPIO_Port GPIOB
 #define LED2_PIN_Pin GPIO_PIN_4
