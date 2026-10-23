@@ -119,8 +119,9 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
         if (hfdcan == &hfdcan1)
         {
            
-
-
+#if USE_DJ && (MOTOR_DJI_CAN_BUS == 0U)
+            DJmotor_Receive(Rxheader, Rx_data);
+#endif
 
 #if USE_ZMDR
             ZdriveReceive(Rxheader, Rx_data, 0U);

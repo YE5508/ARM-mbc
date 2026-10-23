@@ -20,14 +20,14 @@ extern "C"
 /* ------------------------------------------------------------------ */
 #define USE_DJ 1
 #define USE_VESC 0 // 未验证,不要启用
-#define USE_ZMDR 1
+#define USE_ZMDR 2
 #define USE_UNITREE 1
 
 /* ------------------------------------------------------------------ */
 /* DJI M2006 / M3508                                                    */
 /* ------------------------------------------------------------------ */
 #define MOTOR_DJI_COUNT 4U  /* 必须为 4 或 8(DJI CAN 打包要求) */
-#define MOTOR_DJI_CAN_BUS 1 /* 0=FDCAN1,1=FDCAN2,2=FDCAN3 */
+#define MOTOR_DJI_CAN_BUS 2 /* 0=FDCAN1,1=FDCAN2,2=FDCAN3 */
 
 #define MOTOR_M2006_COUNT 0U
 #define MOTOR_M3508_COUNT 4U
@@ -50,8 +50,8 @@ extern "C"
 /* 原则上两者不同总线。                                                */
 /* ------------------------------------------------------------------ */
 #define MOTOR_ZDRIVE_COUNT 2U       /* 机械臂 GIM4310 + U8Lite,最多控 8 个电机 */
-#define MOTOR_ZDRIVE_SPLIT_COUNT 0U /* 0=不拆分;n=前 n 个 ID 走第一路 */
-#define MOTOR_ZDRIVE_CAN_BUS_1 2U   /* 机械臂两台 ZDrive 都走 FDCAN3 */
+#define MOTOR_ZDRIVE_SPLIT_COUNT 4U /* 0=不拆分;n=前 n 个 ID 走第一路 */
+#define MOTOR_ZDRIVE_CAN_BUS_1 1U   /* 机械臂两台 ZDrive 都走 FDCAN1 */
 #define MOTOR_ZDRIVE_CAN_BUS_2 2U   /* 第二路:FDCAN3(拆分时) */
 #define MOTOR_ZDRIVE_BUS_RETRANS_CNT 2 //调用出队函数时,单BUS连续发送的次数
 

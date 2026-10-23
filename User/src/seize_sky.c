@@ -306,6 +306,34 @@ void Arm_Control_Init(void)
     ArmControl.arm_motor.PrismaticZ1=&Zmotor[1];//U8Lite
     ArmControl.arm_motor.RotaryDJ = &DJmotor[1];
 
+    /*
+    ArmControl.arm_motor.RotaryU1->cmd.kp=;
+    ArmControl.arm_motor.RotaryU1->cmd.kd=;
+   */
+    ArmControl.arm_motor.RotaryDJ->posPID.KP=0.3F;
+    ArmControl.arm_motor.RotaryDJ->posPID.KI=0;
+    ArmControl.arm_motor.RotaryDJ->posPID.KD=0.009F;
+    ArmControl.arm_motor.RotaryDJ->velPID.KP=7.0F;
+    ArmControl.arm_motor.RotaryDJ->velPID.KI=0.3F;
+    ArmControl.arm_motor.RotaryDJ->velPID.KD=0.1F;
+
+    ArmControl.arm_motor.RotaryZ1->param.kpPos=0.5F;
+    ArmControl.arm_motor.RotaryZ1->param.kdPos=0.1F;
+
+    ArmControl.arm_motor.RotaryZ1->param.kpVel=0.5F;
+    ArmControl.arm_motor.RotaryZ1->param.kiVel=0;
+
+    ArmControl.arm_motor.PrismaticZ1->param.kpPos=4.8F;
+    ArmControl.arm_motor.PrismaticZ1->param.kdPos=0.001F;
+
+    ArmControl.arm_motor.PrismaticZ1->param.kpVel=1.5F;
+    ArmControl.arm_motor.PrismaticZ1->param.kiVel=0;
+
+
+
+
+
+
     ArmControl.enable    = false;
     ArmControl.reset     = false;
     ArmControl.state     = ARM_STATE_SILENT;
