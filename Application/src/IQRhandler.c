@@ -56,6 +56,7 @@ void TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 
         CAN_DequeueTx(&CAN1_Txqueue);
+        CAN_DequeueTx(&JawTxqueue);
 #if USE_ZMDR
         ZdriveDequeue((uint8_t)MOTOR_ZDRIVE_CAN_BUS_1);
         ZdriveDequeue((uint8_t)MOTOR_ZDRIVE_CAN_BUS_2);
