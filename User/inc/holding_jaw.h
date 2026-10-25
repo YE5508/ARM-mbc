@@ -6,7 +6,13 @@
 #include "FD_Canqueue.h"
 
 
-extern bool Jaw_Open;
+typedef struct
+{
+    bool Jaw_Open_now;
+    bool Jaw_Open_last;
+} Jaw_Switch_t;
+
+extern Jaw_Switch_t Jaw_Open;
 extern FDCAN_SendQueueType JawTxqueue;
 
 void Jaw_Init(void);

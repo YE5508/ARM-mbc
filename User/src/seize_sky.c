@@ -1,7 +1,7 @@
 #include "seize_sky.h"
 #include "kinematics.h"
 #include "DJmotor.h"
-
+#include "holding_jaw.h"
 
 
 #define ARM_INTERPOLATION_DT    0.001f
@@ -367,6 +367,8 @@ void Arm_Control_Init(void)
 
     ArmControl.running = false;
     ArmControl.finish  = true;   //防止上电后立刻乱动
+
+    Jaw_Init();
 }
 
 
