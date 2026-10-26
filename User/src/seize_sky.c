@@ -20,10 +20,20 @@
 #define ARM_START_VELOCITY    0.2f
 #define ARM_START_ACCEL       2.0f
 
+/*
+typedef struct
+{
+    float u1;             // rad
+    float prismatic_z1;   // deg
+    float dj;             // deg
+    float move_time;      // s
+} Arm_Pose_Config_t;
+*/
+
 Arm_Pose_Config_t Arm_Pose_Table[ARM_STATE_COUNT] =
 {
     // 新机构位置待实测标定；旋转状态仅使用 move_time，前三项运行时继承
-    [ARM_STATE_SILENT]          = {0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
+    [ARM_STATE_SILENT]          = {-1.5f, 0.0f, -69.0f, ARM_MOVE_TIME},
     [ARM_STATE_SKY_PRE_H]       = {0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
     [ARM_STATE_SKY_PRE_V]       = {0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
     [ARM_STATE_SKY_PICK_H]      = {0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
@@ -48,11 +58,16 @@ Arm_Pose_Config_t Arm_Pose_Table[ARM_STATE_COUNT] =
 #endif
 };
 
-/* 始终从机械零位计算理想目标，反馈仅用于插补起点。 */
+/* 离散角度选择独立标定的绝对目标，反馈仅用于插补起点。 */
 static float Arm_End_Target(void)
 {
-    return ARM_END_ZERO_POS_DEG + (float)ArmControl.end_quarter_turns *
-           90.0f * ARM_END_POS_PER_DEG;
+    switch (ArmControl.end_quarter_turns)
+    {
+        case -1: return ARM_END_CCW90_POS_DEG;
+        case 1:  return ARM_END_CW90_POS_DEG;
+        case 2:  return ARM_END_CW180_POS_DEG;
+        default: return ARM_END_ZERO_POS_DEG;
+    }
 }
 
 static Arm_Pose_t Arm_Load_Pose(ArmState_t state)

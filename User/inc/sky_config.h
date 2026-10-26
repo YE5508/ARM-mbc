@@ -14,9 +14,11 @@
 #define USE_FK 0
 #define USE_IK 0
 
-/* 末端角度 -> ZDrive pos_deg，勿重复应用驱动内部 ReductionRatio。 */
+/* 各离散角度独立标定的绝对 pos_deg，不再使用统一比例换算。 */
 #define ARM_END_ZERO_POS_DEG       0.0f
-#define ARM_END_POS_PER_DEG        1.0f /* TODO 实测标定；顺时针为正 */
+#define ARM_END_CCW90_POS_DEG     (-929.337646f)
+#define ARM_END_CW90_POS_DEG       912.406311f
+#define ARM_END_CW180_POS_DEG      1802.16016f
 #define ARM_END_MIN_REPLAN_TIME    1.5f /* 运动中加入旋转的最短剩余时间(s) */
 
 /* ------------------------------------------------------------------ */

@@ -78,13 +78,20 @@ HARNESS = r"""
 #include <assert.h>
 #include <stdio.h>
 #include "seize_sky.c"
+#include "expected.h"
 UnitreeMotor Unitree_motors[1];
 DJMotor DJmotor[2];
 Zdrive Zmotor[2];
 FDCAN_HandleTypeDef hfdcan3;
-static void near(float a, float b) { assert(fabsf(a-b) < 0.002f); }
+static void check_near(float a, float b, int line) {
+    if (fabsf(a-b) >= 0.002f) {
+        fprintf(stderr, "line %d: actual=%f expected=%f\n", line, a, b);
+        assert(0);
+    }
+}
+#define near(a,b) check_near((a),(b),__LINE__)
 static float ideal(int n) {
-    return ARM_END_ZERO_POS_DEG + n * 90.0f * ARM_END_POS_PER_DEG;
+    return expected_end[n+1];
 }
 static void request(ArmState_t state) { ArmControl.req_state=state; Arm_Func(); }
 static void setup(void) {
@@ -228,13 +235,18 @@ def main():
         (temp / "test.c").write_text(HARNESS, encoding="utf-8")
         config = (ROOT / "User/inc/sky_config.h").read_text(encoding="utf-8")
         for fk, ik in ((0, 0), (1, 0), (0, 1), (1, 1)):
-            for zero, ratio in ((0, 1), (12, 2.5)):
+            # Independently specified absolute endpoints, deliberately asymmetric.
+            for targets in ((-929.337646, 0, 912.406311, 1802.16016),
+                            (-923, 12, 907, 1795)):
                 variant = re.sub(r"(#define USE_FK) 0", rf"\g<1> {fk}", config)
                 variant = re.sub(r"(#define USE_IK) 0", rf"\g<1> {ik}", variant)
-                variant = re.sub(r"(#define ARM_END_ZERO_POS_DEG\s+)0\.0f",
-                                 rf"\g<1>{zero:.1f}f", variant)
-                variant = re.sub(r"(#define ARM_END_POS_PER_DEG\s+)1\.0f",
-                                 rf"\g<1>{ratio:.1f}f", variant)
+                for name, value in zip(("CCW90", "ZERO", "CW90", "CW180"), targets):
+                    variant = re.sub(rf"(#define ARM_END_{name}_POS_DEG\s+)[^\n]+",
+                                     rf"\g<1>({value:.6f}f)", variant)
+                values = ", ".join(f"{value:.6f}f" for value in targets)
+                (temp / "expected.h").write_text(
+                    f"static const float expected_end[] = {{{values}}};\n",
+                    encoding="utf-8")
                 (temp / "sky_config.h").write_text(variant, encoding="utf-8")
                 executable = temp / "test.exe"
                 subprocess.run([compiler, "-std=c99", "-Wall", "-Wextra", "-Werror",
@@ -243,7 +255,7 @@ def main():
                                 str(temp / "kinematics.c"), "-lm", "-o", str(executable)],
                                check=True)
                 subprocess.run([str(executable)], check=True)
-                print(f"PASS FK={fk} IK={ik} zero={zero} ratio={ratio}", flush=True)
+                print(f"PASS FK={fk} IK={ik} targets={targets}", flush=True)
 
 
 if __name__ == "__main__":
