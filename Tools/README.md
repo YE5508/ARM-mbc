@@ -1,6 +1,6 @@
 # Tools —— 项目内开发工具
 
-本目录放工程自带的开发工具,目前只有 Keil 命令行编译脚本。
+本目录放工程自带的 Keil 编译脚本和主机侧控制逻辑测试。
 
 ## build.ps1 —— 命令行编译
 
@@ -26,3 +26,16 @@ powershell -File Tools\build.ps1 -Project "E:\...\xxx.uvprojx" -UV4 "D:\Keil_v5\
   换机器用 `-UV4` 参数指定即可;
 - 常见提示:链接警告 `L6314W: No section matches pattern *(.RAM_D3)` 是模板
   预存警告(工程未使用 `__RAM_D3_` 段),不影响编译。
+
+## 机械臂状态测试
+
+```powershell
+python Tools/tests/test_arm_states.py
+# 指定主机 C 编译器
+python Tools/tests/test_arm_states.py --cc gcc
+```
+
+需要 Python 3 和主机 GCC。测试在临时目录编译真实的机械臂控制、头文件及运动学代码，
+仅替换硬件接口；覆盖四种 FK/IK 开关组合、两组零位/比例、旋转切换时长、反馈偏差、
+静止旋转时位置指令保持和业务/调试模式切换。测试不会改写固件配置或工程文件，
+不替代 Keil 固件编译及上机角度标定。

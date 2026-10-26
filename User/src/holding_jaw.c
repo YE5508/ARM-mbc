@@ -27,7 +27,7 @@ void Jaw_Func(void)
     uint8_t Rxdata[1];
     Rxheader.DataLength=1;
     Rxheader.IdType=FDCAN_STANDARD_ID;
-    Rxheader.Identifier=0x432;
+    Rxheader.Identifier=0x423;
 
     Rxdata[0]=Jaw_Open.Jaw_Open_now|0x00;
     CAN_Enqueue(&JawTxqueue,Rxheader, Rxdata);

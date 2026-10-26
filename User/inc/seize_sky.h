@@ -13,7 +13,7 @@
 #include "kinematics.h"
 #include "fdcan.h"
 
-/* 状态位姿（四台电机 + 运行时间）统一放在 Arm_Pose_Table，见 seize_sky.c，
+/* 位置配置（三台位置电机 + 运行时间）放在 Arm_Pose_Table，末端旋转独立管理，
    新机构数值待实测标定 */
 
 extern volatile uint8_t Is_ok;
@@ -25,14 +25,15 @@ typedef enum
     ARM_STATE_SKY_PRE_V,        // 竖预取天空块
     ARM_STATE_SKY_PICK_H,       // 横取天空块
     ARM_STATE_SKY_PICK_V,       // 竖取天空块
-    ARM_STATE_SKY_KEEP_CW90,    // 持天空块:GIM4310 顺时针90°
-    ARM_STATE_SKY_KEEP_CW180,   // 持天空块:GIM4310 顺时针180°
-    ARM_STATE_SKY_KEEP_CCW90,   // 持天空块:GIM4310 逆时针90°
-    ARM_STATE_SKY_KEEP_CCW180,  // 持天空块:GIM4310 逆时针180°
-    ARM_STATE_SKY_PLACE,        // 放置天空块(沿用上一个持块状态的GIM角度)
-    ARM_STATE_BALL_PRE,         // 预取球
-    ARM_STATE_BALL_PICK,        // 取球
-    ARM_STATE_BALL_PLACE,       // 放置球
+    ARM_STATE_END_CW90 = 5,    // 末端相对机械零位顺时针90°
+    ARM_STATE_END_CW180 = 6,   // 末端相对机械零位顺时针180°
+    ARM_STATE_END_CCW90 = 7,   // 末端相对机械零位逆时针90°
+    // 8: 原 CCW180 状态编号保留，不再使用
+    ARM_STATE_SKY_PLACE = 9,   // 放置天空块，保持理想末端角度
+    ARM_STATE_BALL_PRE = 10,   // 预取球
+    ARM_STATE_BALL_PICK = 11,  // 取球
+    ARM_STATE_BALL_PLACE = 12, // 放置球
+    ARM_STATE_SKY_KEEP = 13,   // 持天空块位置，保持理想末端角度
 #if USE_FK
     ARM_DEBUG,              // 正运动学调试
 #endif
@@ -51,7 +52,16 @@ typedef enum
     ARM_MODE_CARTESIAN      // 笛卡尔：末端坐标轨迹 + 逐周期逆解（需 USE_FK && USE_IK）
 } ArmMode_t;
 
-// 配置表条目（下标 = ArmState_t 枚举值）
+// 配置表条目（下标 = ArmState_t；旋转状态仅使用 move_time）
+typedef struct
+{
+    float u1;             // rad
+    float prismatic_z1;   // deg
+    float dj;             // deg
+    float move_time;      // s
+} Arm_Pose_Config_t;
+
+// 运行时完整目标：由位置表与独立末端角度逐项组装
 typedef struct
 {
     float u1;             // 宇树电机U1转角 (rad)
@@ -100,7 +110,8 @@ typedef struct
     volatile ArmState_t  state;      // 当前状态
     volatile ArmState_t  req_state;  // 请求状态（变化沿检测源）
 
-    Arm_Pose_t pose;   // 四台电机状态配置（来自配置表）
+    Arm_Pose_t pose;   // 四台电机运行目标
+    int32_t end_quarter_turns; // 理想末端角度相对机械零位的90°步数
     ArmTraj_t  traj;   // 轨迹规划结构体
     Arm_Motor arm_motor;
 
@@ -166,7 +177,7 @@ extern Arm_Interpolation_t Arm_Debug;
 extern Arm_Interpolation_Pos_t Arm_Pos_Debug;
 #endif
 extern ArmControl_t ArmControl;
-extern Arm_Pose_t Arm_Pose_Table[ARM_STATE_COUNT];
+extern Arm_Pose_Config_t Arm_Pose_Table[ARM_STATE_COUNT];
 
 void Relay_ON(void);
 void Relay_OFF(void);

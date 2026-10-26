@@ -14,6 +14,11 @@
 #define USE_FK 0
 #define USE_IK 0
 
+/* 末端角度 -> ZDrive pos_deg，勿重复应用驱动内部 ReductionRatio。 */
+#define ARM_END_ZERO_POS_DEG       0.0f
+#define ARM_END_POS_PER_DEG        1.0f /* TODO 实测标定；顺时针为正 */
+#define ARM_END_MIN_REPLAN_TIME    1.5f /* 运动中加入旋转的最短剩余时间(s) */
+
 /* ------------------------------------------------------------------ */
 /* 主控板状态命令 CANID(FDCAN3 扩展帧)                                 */
 /* 待主控板协议确定后填入,0 = 未分配(Arm_Receive 自动跳过该条目)       */
@@ -23,10 +28,10 @@
 #define ARM_CANID_STATE_SKY_PRE_V       0x00000000U /* 竖预取天空块         TODO */
 #define ARM_CANID_STATE_SKY_PICK_H      0x00000000U /* 横取天空块           TODO */
 #define ARM_CANID_STATE_SKY_PICK_V      0x00000000U /* 竖取天空块           TODO */
-#define ARM_CANID_STATE_SKY_KEEP_CW90   0x00000000U /* 持天空块:顺时针90°   TODO */
-#define ARM_CANID_STATE_SKY_KEEP_CW180  0x00000000U /* 持天空块:顺时针180°  TODO */
-#define ARM_CANID_STATE_SKY_KEEP_CCW90  0x00000000U /* 持天空块:逆时针90°   TODO */
-#define ARM_CANID_STATE_SKY_KEEP_CCW180 0x00000000U /* 持天空块:逆时针180°  TODO */
+#define ARM_CANID_STATE_END_CW90        0x00000000U /* 末端顺时针90°       TODO */
+#define ARM_CANID_STATE_END_CW180       0x00000000U /* 末端顺时针180°      TODO */
+#define ARM_CANID_STATE_END_CCW90       0x00000000U /* 末端逆时针90°       TODO */
+#define ARM_CANID_STATE_SKY_KEEP        0x00000000U /* 持天空块位置         TODO */
 #define ARM_CANID_STATE_SKY_PLACE       0x00000000U /* 放置天空块           TODO */
 #define ARM_CANID_STATE_BALL_PRE        0x00000000U /* 预取球               TODO */
 #define ARM_CANID_STATE_BALL_PICK       0x00000000U /* 取球                 TODO */
