@@ -12,7 +12,7 @@ void Jaw_Init(void)
 {
     Jaw_Open.Jaw_Open_now=false;
     Jaw_Open.Jaw_Open_last=false;
-    JawTxqueue.Canx=FDCAN2;
+    JawTxqueue.Canx=FDCAN3;
     JawTxqueue.Front = JawTxqueue.Rear = 0;
 
 }

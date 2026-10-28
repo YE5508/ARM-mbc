@@ -158,137 +158,87 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>DJmotor,0x0A</ItemText>
+          <ItemText>Is_on</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>hfdcan2</ItemText>
+          <ItemText>level_flag</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Unitree_motors</ItemText>
+          <ItemText>Is_pick</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Is_on</ItemText>
+          <ItemText>Is_place</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>1</WinNumber>
-          <ItemText>level_flag</ItemText>
+          <ItemText>Is_store</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Is_pick</ItemText>
+          <ItemText>Is_ready</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Is_place</ItemText>
+          <ItemText>Is_reset</ItemText>
         </Ww>
         <Ww>
           <count>7</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Is_store</ItemText>
+          <ItemText>Is_open</ItemText>
         </Ww>
         <Ww>
           <count>8</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Is_ready</ItemText>
+          <ItemText>Is_keep</ItemText>
         </Ww>
         <Ww>
           <count>9</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Is_reset</ItemText>
+          <ItemText>Arm_Debug</ItemText>
         </Ww>
         <Ww>
           <count>10</count>
           <WinNumber>1</WinNumber>
-          <ItemText>ArmControl.finish</ItemText>
+          <ItemText>Arm_Kinetics_Data</ItemText>
         </Ww>
         <Ww>
           <count>11</count>
           <WinNumber>1</WinNumber>
-          <ItemText>ArmControl.running</ItemText>
+          <ItemText>Arm_Pos_Debug</ItemText>
         </Ww>
         <Ww>
           <count>12</count>
           <WinNumber>1</WinNumber>
-          <ItemText>ArmControl.state</ItemText>
+          <ItemText>Rxheader.Identifier</ItemText>
         </Ww>
         <Ww>
           <count>13</count>
           <WinNumber>1</WinNumber>
-          <ItemText>ArmControl.state</ItemText>
+          <ItemText>\\27RC_Proj_Template\../User/src/seize_sky.c\Arm_Pos_Debug.x</ItemText>
         </Ww>
         <Ww>
           <count>14</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Is_open</ItemText>
+          <ItemText>\\27RC_Proj_Template\../User/src/seize_sky.c\Arm_Debug,0x10</ItemText>
         </Ww>
         <Ww>
           <count>15</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Is_keep</ItemText>
+          <ItemText>\\27RC_Proj_Template\../User/src/seize_sky.c\Arm_Debug</ItemText>
         </Ww>
         <Ww>
           <count>16</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Arm_Debug</ItemText>
-        </Ww>
-        <Ww>
-          <count>17</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>Arm_Kinetics_Data</ItemText>
-        </Ww>
-        <Ww>
-          <count>18</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>ArmControl,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>19</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>Arm_Pos_Debug</ItemText>
-        </Ww>
-        <Ww>
-          <count>20</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>Rxheader.Identifier</ItemText>
-        </Ww>
-        <Ww>
-          <count>21</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>\\27RC_Proj_Template\../User/src/seize_sky.c\Arm_Pos_Debug.x</ItemText>
-        </Ww>
-        <Ww>
-          <count>22</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>\\27RC_Proj_Template\../User/src/seize_sky.c\Arm_Debug,0x10</ItemText>
-        </Ww>
-        <Ww>
-          <count>23</count>
-          <WinNumber>1</WinNumber>
           <ItemText>ArmControl</ItemText>
-        </Ww>
-        <Ww>
-          <count>24</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>Arm_Pose_Table</ItemText>
-        </Ww>
-        <Ww>
-          <count>25</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>\\27RC_Proj_Template\../User/src/seize_sky.c\ArmControl.arm_motor.RotaryU1-&gt;data.bad_msg</ItemText>
-        </Ww>
-        <Ww>
-          <count>26</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>Jaw_Open</ItemText>
         </Ww>
       </WatchWindow1>
       <MemoryWindow1>
