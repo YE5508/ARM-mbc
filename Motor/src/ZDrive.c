@@ -429,8 +429,7 @@ static void Zdrive_RunMachine(Zdrive *motor, uint8_t id)
                 motor->valSetPre.pos_deg = motor->valSetNow.pos_deg;
                 ZdriveSet(motor->valSetNow.pos_deg, id, PosIn);
             }
-            else if (motor->valSetNow.pos_deg == 0.0f &&
-                     fabs(motor->valReal.posIn_deg) > 0.5f)
+            else if (motor->valSetNow.pos_deg == 0.0f)
             {
                 ZdriveSet(motor->valSetNow.pos_deg, id, PosIn);
             }
