@@ -10,7 +10,14 @@
  *   USE_IK = 1        -> kinematics 逆解(Inverse)与 ARM_Pos_DEBUG 调试状态参与编译
  *   USE_FK && USE_IK  -> ARM_CartPos_DEBUG(笛卡尔轨迹 + 逐周期逆解)参与编译
  * 默认全 0:新机构(已非双宇树 2R 模型)标定完成前,相关代码不参与编译。
+ * seize_sky 中的运动学调试还要求 RotaryU1_USE 与 RotaryZ1_USE 均为 1。
  */
+/* 电机开关：1 启用，0 裁剪 seize_sky 对应成员和访问，不控制驱动层通信。 */
+#define RotaryU1_USE    1
+#define RotaryDJ_USE    1
+#define RotaryZ1_USE    1
+#define PrismaticZ1_USE 1
+
 #define USE_FK 0
 #define USE_IK 0
 

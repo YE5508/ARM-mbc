@@ -7,10 +7,10 @@
 #define ARM_INTERPOLATION_DT 0.001f
 #define ARM_EPSILON 0.0001f
 #define ARM_MOVE_TIME 5.0f
-#if USE_FK
+#if ARM_USE_FK
 #define ARM_Debug_MOVE_TIME 6.0f
 #endif
-#if USE_IK
+#if ARM_USE_IK
 #define ARM_Pos_Debug_MOVE_TIME 30.0f
 #endif
 
@@ -19,45 +19,206 @@
 #define ARM_START_VELOCITY 0.2f
 #define ARM_START_ACCEL 2.0f
 
-/*
-typedef struct
-{
-    float u1;             // rad
-    float prismatic_z1;   // deg
-    float dj;             // deg
-    float move_time;      // s
-} Arm_Pose_Config_t;
-*/
-
 Arm_Pose_Config_t Arm_Pose_Table[ARM_STATE_COUNT] =
     {
         // 新机构位置待实测标定；旋转状态仅使用 move_time，前三项运行时继承
-        /*0*/ [ARM_STATE_SILENT] = {-1.5f, 40.0f, -69.0f, ARM_MOVE_TIME},
-        /*1*/ [ARM_STATE_SKY_PRE_H] = {0.068f, -3.0f, -6.8f, ARM_MOVE_TIME},
-        /*2*/ [ARM_STATE_SKY_PRE_V] = {0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
-        /*3*/ [ARM_STATE_SKY_PICK_H] = {0.35f, -8.8f, -6.67f, ARM_MOVE_TIME},
-        /*4*/ [ARM_STATE_SKY_PICK_V] = {0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
-        /*5*/ [ARM_STATE_END_CW90] = {0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
-        /*6*/ [ARM_STATE_END_CW180] = {0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
-        /*7*/ [ARM_STATE_END_CCW90] = {0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
-        /*8*/ [ARM_STATE_SKY_KEEP] = {-2.76f, 76.5f, -5.456f, ARM_MOVE_TIME},
-        /*9*/ [ARM_STATE_SKY_PLACE] = {0.35f, -8.8f, -6.67f, ARM_MOVE_TIME},
-        /*10*/ [ARM_STATE_BALL_PRE] = {0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
-        /*11*/ [ARM_STATE_BALL_PICK] = {0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
-        /*12*/ [ARM_STATE_BALL_PLACE] = {0.0f, 0.0f, 0.0f, ARM_MOVE_TIME},
-#if USE_FK
+        /*0*/ [ARM_STATE_SILENT] = {
+#if RotaryU1_USE
+            .u1 = -1.5f,
+#endif
+#if PrismaticZ1_USE
+            .prismatic_z1 = 40.0f,
+#endif
+#if RotaryDJ_USE
+            .dj = -69.0f,
+#endif
+            .move_time = ARM_MOVE_TIME,
+        },
+        /*1*/ [ARM_STATE_SKY_PRE_H] = {
+#if RotaryU1_USE
+            .u1 = 0.068f,
+#endif
+#if PrismaticZ1_USE
+            .prismatic_z1 = -3.0f,
+#endif
+#if RotaryDJ_USE
+            .dj = -6.8f,
+#endif
+            .move_time = ARM_MOVE_TIME,
+        },
+        /*2*/ [ARM_STATE_SKY_PRE_V] = {
+#if RotaryU1_USE
+            .u1 = 0.0f,
+#endif
+#if PrismaticZ1_USE
+            .prismatic_z1 = 0.0f,
+#endif
+#if RotaryDJ_USE
+            .dj = 0.0f,
+#endif
+            .move_time = ARM_MOVE_TIME,
+        },
+        /*3*/ [ARM_STATE_SKY_PICK_H] = {
+#if RotaryU1_USE
+            .u1 = 0.35f,
+#endif
+#if PrismaticZ1_USE
+            .prismatic_z1 = -8.8f,
+#endif
+#if RotaryDJ_USE
+            .dj = -6.67f,
+#endif
+            .move_time = ARM_MOVE_TIME,
+        },
+        /*4*/ [ARM_STATE_SKY_PICK_V] = {
+#if RotaryU1_USE
+            .u1 = 0.0f,
+#endif
+#if PrismaticZ1_USE
+            .prismatic_z1 = 0.0f,
+#endif
+#if RotaryDJ_USE
+            .dj = 0.0f,
+#endif
+            .move_time = ARM_MOVE_TIME,
+        },
+        /*5*/ [ARM_STATE_END_CW90] = {
+#if RotaryU1_USE
+            .u1 = 0.0f,
+#endif
+#if PrismaticZ1_USE
+            .prismatic_z1 = 0.0f,
+#endif
+#if RotaryDJ_USE
+            .dj = 0.0f,
+#endif
+            .move_time = ARM_MOVE_TIME,
+        },
+        /*6*/ [ARM_STATE_END_CW180] = {
+#if RotaryU1_USE
+            .u1 = 0.0f,
+#endif
+#if PrismaticZ1_USE
+            .prismatic_z1 = 0.0f,
+#endif
+#if RotaryDJ_USE
+            .dj = 0.0f,
+#endif
+            .move_time = ARM_MOVE_TIME,
+        },
+        /*7*/ [ARM_STATE_END_CCW90] = {
+#if RotaryU1_USE
+            .u1 = 0.0f,
+#endif
+#if PrismaticZ1_USE
+            .prismatic_z1 = 0.0f,
+#endif
+#if RotaryDJ_USE
+            .dj = 0.0f,
+#endif
+            .move_time = ARM_MOVE_TIME,
+        },
+        /*8*/ [ARM_STATE_SKY_KEEP] = {
+#if RotaryU1_USE
+            .u1 = -2.76f,
+#endif
+#if PrismaticZ1_USE
+            .prismatic_z1 = 76.5f,
+#endif
+#if RotaryDJ_USE
+            .dj = -5.456f,
+#endif
+            .move_time = ARM_MOVE_TIME,
+        },
+        /*9*/ [ARM_STATE_SKY_PLACE] = {
+#if RotaryU1_USE
+            .u1 = 0.35f,
+#endif
+#if PrismaticZ1_USE
+            .prismatic_z1 = -8.8f,
+#endif
+#if RotaryDJ_USE
+            .dj = -6.67f,
+#endif
+            .move_time = ARM_MOVE_TIME,
+        },
+        /*10*/ [ARM_STATE_BALL_PRE] = {
+#if RotaryU1_USE
+            .u1 = 0.0f,
+#endif
+#if PrismaticZ1_USE
+            .prismatic_z1 = 0.0f,
+#endif
+#if RotaryDJ_USE
+            .dj = 0.0f,
+#endif
+            .move_time = ARM_MOVE_TIME,
+        },
+        /*11*/ [ARM_STATE_BALL_PICK] = {
+#if RotaryU1_USE
+            .u1 = 0.0f,
+#endif
+#if PrismaticZ1_USE
+            .prismatic_z1 = 0.0f,
+#endif
+#if RotaryDJ_USE
+            .dj = 0.0f,
+#endif
+            .move_time = ARM_MOVE_TIME,
+        },
+        /*12*/ [ARM_STATE_BALL_PLACE] = {
+#if RotaryU1_USE
+            .u1 = 0.0f,
+#endif
+#if PrismaticZ1_USE
+            .prismatic_z1 = 0.0f,
+#endif
+#if RotaryDJ_USE
+            .dj = 0.0f,
+#endif
+            .move_time = ARM_MOVE_TIME,
+        },
+#if ARM_USE_FK
         // 调试状态：位置/时长占位，运行时直接组装完整 pose
-        [ARM_DEBUG] = {0.0f, 0.0f, 0.0f, ARM_Debug_MOVE_TIME},
+        [ARM_DEBUG] = {
+            .u1 = 0.0f,
+#if PrismaticZ1_USE
+            .prismatic_z1 = 0.0f,
 #endif
-#if USE_IK
-        [ARM_Pos_DEBUG] = {0.0f, 0.0f, 0.0f, ARM_Pos_Debug_MOVE_TIME},
+#if RotaryDJ_USE
+            .dj = 0.0f,
 #endif
-#if (USE_FK && USE_IK)
-        [ARM_CartPos_DEBUG] = {0.0f, 0.0f, 0.0f, ARM_Pos_Debug_MOVE_TIME},
+            .move_time = ARM_Debug_MOVE_TIME,
+        },
+#endif
+#if ARM_USE_IK
+        [ARM_Pos_DEBUG] = {
+            .u1 = 0.0f,
+#if PrismaticZ1_USE
+            .prismatic_z1 = 0.0f,
+#endif
+#if RotaryDJ_USE
+            .dj = 0.0f,
+#endif
+            .move_time = ARM_Pos_Debug_MOVE_TIME,
+        },
+#endif
+#if (ARM_USE_FK && ARM_USE_IK)
+        [ARM_CartPos_DEBUG] = {
+            .u1 = 0.0f,
+#if PrismaticZ1_USE
+            .prismatic_z1 = 0.0f,
+#endif
+#if RotaryDJ_USE
+            .dj = 0.0f,
+#endif
+            .move_time = ARM_Pos_Debug_MOVE_TIME,
+        },
 #endif
 };
 
 /* 离散角度选择独立标定的绝对目标，反馈仅用于插补起点。 */
+#if RotaryZ1_USE
 static float Arm_End_Target(void)
 {
     switch (ArmControl.end_quarter_turns)
@@ -72,41 +233,58 @@ static float Arm_End_Target(void)
         return ARM_END_ZERO_POS_DEG;
     }
 }
+#endif
 
 static Arm_Pose_t Arm_Load_Pose(ArmState_t state)
 {
     Arm_Pose_t pose;
+#if RotaryU1_USE
     pose.u1 = Arm_Pose_Table[state].u1;
+#endif
+#if PrismaticZ1_USE
     pose.prismatic_z1 = Arm_Pose_Table[state].prismatic_z1;
+#endif
+#if RotaryDJ_USE
     pose.dj = Arm_Pose_Table[state].dj;
+#endif
     pose.move_time = Arm_Pose_Table[state].move_time;
+#if RotaryZ1_USE
     pose.rotary_z1 = Arm_End_Target();
+#endif
 
-#if USE_FK
+#if ARM_USE_FK
     if (state == ARM_DEBUG)
     {
         pose.u1 = Arm_Debug.u1_target;
         pose.rotary_z1 = Arm_Debug.rotary_z1_target;
+#if PrismaticZ1_USE
         pose.prismatic_z1 = Arm_Debug.prismatic_z1_target;
+#endif
+#if RotaryDJ_USE
         pose.dj = Arm_Debug.dj_target;
+#endif
         pose.move_time = Arm_Debug.move_time;
     }
 #endif
-#if USE_IK
+#if ARM_USE_IK
     if (state == ARM_Pos_DEBUG)
     {
         Vec2 p = {Arm_Pos_Debug.x, Arm_Pos_Debug.y};
         Unitree_Theta_t th = Inverse(p);
         pose.u1 = th.u1_theta;
         pose.rotary_z1 = RAD2DEG(th.u2_theta); // TODO 旧2R模型映射待标定
+#if RotaryDJ_USE
         pose.dj = Arm_Pos_Debug.dj_target;
+#endif
         pose.move_time = Arm_Pos_Debug.move_time;
     }
 #endif
-#if (USE_FK && USE_IK)
+#if (ARM_USE_FK && ARM_USE_IK)
     if (state == ARM_CartPos_DEBUG)
     {
+#if RotaryDJ_USE
         pose.dj = Arm_Pos_Debug.dj_target;
+#endif
         pose.move_time = Arm_Pos_Debug.move_time;
     }
 #endif
@@ -116,13 +294,14 @@ static Arm_Pose_t Arm_Load_Pose(ArmState_t state)
 volatile uint8_t Is_ok = 0;
 
 ArmControl_t ArmControl;
-#if USE_FK
-Arm_Interpolation_t Arm_Debug = {0, 0, 0, 0, ARM_Debug_MOVE_TIME};
+static volatile bool s_arm_initialized = false;
+#if ARM_USE_FK
+Arm_Interpolation_t Arm_Debug = {.move_time = ARM_Debug_MOVE_TIME};
 #endif
-#if USE_IK
-Arm_Interpolation_Pos_t Arm_Pos_Debug = {0, 0, 0, ARM_Pos_Debug_MOVE_TIME};
+#if ARM_USE_IK
+Arm_Interpolation_Pos_t Arm_Pos_Debug = {.move_time = ARM_Pos_Debug_MOVE_TIME};
 #endif
-#if (USE_FK || USE_IK)
+#if (ARM_USE_FK || ARM_USE_IK)
 Arm_Kinetics_Data_t Arm_Kinetics_Data = {0};
 #endif
 
@@ -147,6 +326,7 @@ void Relay_OFF(void)
 //   s(0)=0, s(1)=1
 //   s'(0)=v0(可配置), s'(1)=0
 //   s''(0)=acc0(可配置), s''(1)=0
+#if ARM_MOTORS_USE
 static float Quintic_S(float time, float total_time)
 {
     float t;
@@ -199,15 +379,31 @@ static float Target_Quintic_Interpolation(float start_angle, float target,
 static void Arm_Interpolation_Start(Arm_Pose_t pose)
 {
     ArmControl.pose = pose; // 更新状态配置（四台电机 + 运行时间）
+#if RotaryU1_USE
     ArmControl.traj.ctrl.u1_start = ArmControl.arm_motor.RotaryU1->data.position;
+#endif
+#if RotaryZ1_USE
     ArmControl.traj.ctrl.rotary_z1_start = ArmControl.arm_motor.RotaryZ1->valReal.pos_deg;
+#endif
+#if PrismaticZ1_USE
     ArmControl.traj.ctrl.prismatic_z1_start = ArmControl.arm_motor.PrismaticZ1->valReal.pos_deg;
+#endif
+#if RotaryDJ_USE
     ArmControl.traj.ctrl.dj_start = ArmControl.arm_motor.RotaryDJ->valNow.angle_deg;
+#endif
 
+#if RotaryU1_USE
     ArmControl.traj.ctrl.u1_target = pose.u1;
+#endif
+#if RotaryZ1_USE
     ArmControl.traj.ctrl.rotary_z1_target = pose.rotary_z1;
+#endif
+#if PrismaticZ1_USE
     ArmControl.traj.ctrl.prismatic_z1_target = pose.prismatic_z1;
+#endif
+#if RotaryDJ_USE
     ArmControl.traj.ctrl.dj_target = pose.dj;
+#endif
 
     ArmControl.traj.ctrl.time = 0.0f;
     ArmControl.traj.ctrl.total_time = pose.move_time;
@@ -217,7 +413,7 @@ static void Arm_Interpolation_Start(Arm_Pose_t pose)
     /* 不在此置 running/finish —— 由 Arm_Func 依据目标值变化沿决定 */
 }
 
-#if (USE_FK && USE_IK)
+#if (ARM_USE_FK && ARM_USE_IK)
 static void Arm_Interpolation_Cart_Start(Arm_Pose_t pose, float x, float y)
 {
     Unitree_Theta_t now = {ArmControl.arm_motor.RotaryU1->data.position,
@@ -228,7 +424,9 @@ static void Arm_Interpolation_Cart_Start(Arm_Pose_t pose, float x, float y)
     pose.rotary_z1 = RAD2DEG(target.u2_theta);
     ArmControl.traj.ctrl.u1_target = pose.u1;
     ArmControl.traj.ctrl.rotary_z1_target = pose.rotary_z1;
+#if PrismaticZ1_USE
     ArmControl.traj.ctrl.prismatic_z1_target = pose.prismatic_z1;
+#endif
     Vec2 now_pos = Forward(now); // 起点 = 当前真实末端
 
     ArmControl.pose = pose; // dj + move_time 来自表
@@ -236,8 +434,10 @@ static void Arm_Interpolation_Cart_Start(Arm_Pose_t pose, float x, float y)
     ArmControl.traj.ctrl.start_y = now_pos.y;
     ArmControl.traj.ctrl.target_x = x;
     ArmControl.traj.ctrl.target_y = y;
+#if RotaryDJ_USE
     ArmControl.traj.ctrl.dj_start = ArmControl.arm_motor.RotaryDJ->valNow.angle_deg;
     ArmControl.traj.ctrl.dj_target = pose.dj;
+#endif
 
     ArmControl.traj.ctrl.time = 0.0f;
     ArmControl.traj.ctrl.total_time = pose.move_time;
@@ -246,7 +446,7 @@ static void Arm_Interpolation_Cart_Start(Arm_Pose_t pose, float x, float y)
 
     /* 不在此置 running/finish —— 由 Arm_Func 依据目标坐标变化沿决定 */
 }
-#endif /* (USE_FK && USE_IK) */
+#endif /* (ARM_USE_FK && ARM_USE_IK) */
 
 // 轨迹点更新
 static void Arm_Interpolation_Update(void)
@@ -256,7 +456,7 @@ static void Arm_Interpolation_Update(void)
         return;
     }
 
-#if (USE_FK && USE_IK)
+#if (ARM_USE_FK && ARM_USE_IK)
     float s = Quintic_S(ArmControl.traj.ctrl.time, ArmControl.traj.ctrl.total_time);
 
     if (ArmControl.traj.mode == ARM_MODE_CARTESIAN)
@@ -278,15 +478,25 @@ static void Arm_Interpolation_Update(void)
         Unitree_Theta_t th = Inverse(p);
         ArmControl.arm_motor.RotaryU1->cmd.position = th.u1_theta;
         ArmControl.arm_motor.RotaryZ1->valSetNow.pos_deg = RAD2DEG(th.u2_theta); // TODO 第二关节暂按 GIM4310,待标定
+#if RotaryDJ_USE
         ArmControl.arm_motor.RotaryDJ->valSet.angle_deg = ArmControl.traj.ctrl.dj_start + (ArmControl.traj.ctrl.dj_target - ArmControl.traj.ctrl.dj_start) * s;
+#endif
     }
     else
 #endif
     {
+#if RotaryU1_USE
         ArmControl.arm_motor.RotaryU1->cmd.position = Target_Quintic_Interpolation(ArmControl.traj.ctrl.u1_start, ArmControl.traj.ctrl.u1_target, ArmControl.traj.ctrl.time, ArmControl.traj.ctrl.total_time);
+#endif
+#if RotaryZ1_USE
         ArmControl.arm_motor.RotaryZ1->valSetNow.pos_deg = Target_Quintic_Interpolation(ArmControl.traj.ctrl.rotary_z1_start, ArmControl.traj.ctrl.rotary_z1_target, ArmControl.traj.ctrl.time, ArmControl.traj.ctrl.total_time);
+#endif
+#if PrismaticZ1_USE
         ArmControl.arm_motor.PrismaticZ1->valSetNow.pos_deg = Target_Quintic_Interpolation(ArmControl.traj.ctrl.prismatic_z1_start, ArmControl.traj.ctrl.prismatic_z1_target, ArmControl.traj.ctrl.time, ArmControl.traj.ctrl.total_time);
+#endif
+#if RotaryDJ_USE
         ArmControl.arm_motor.RotaryDJ->valSet.angle_deg = Target_Quintic_Interpolation(ArmControl.traj.ctrl.dj_start, ArmControl.traj.ctrl.dj_target, ArmControl.traj.ctrl.time, ArmControl.traj.ctrl.total_time);
+#endif
     }
 
     ArmControl.traj.ctrl.time += ArmControl.traj.ctrl.dt;
@@ -294,7 +504,7 @@ static void Arm_Interpolation_Update(void)
     if (ArmControl.traj.ctrl.time >= ArmControl.traj.ctrl.total_time)
     {
         ArmControl.traj.ctrl.time = ArmControl.traj.ctrl.total_time;
-#if (USE_FK && USE_IK)
+#if (ARM_USE_FK && ARM_USE_IK)
         if (ArmControl.traj.mode == ARM_MODE_CARTESIAN)
         {
             Vec2 p_end;
@@ -307,74 +517,110 @@ static void Arm_Interpolation_Update(void)
         else
 #endif
         {
+#if RotaryU1_USE
             ArmControl.arm_motor.RotaryU1->cmd.position = ArmControl.traj.ctrl.u1_target;
+#endif
+#if RotaryZ1_USE
             ArmControl.arm_motor.RotaryZ1->valSetNow.pos_deg = ArmControl.traj.ctrl.rotary_z1_target;
+#endif
+#if PrismaticZ1_USE
             ArmControl.arm_motor.PrismaticZ1->valSetNow.pos_deg = ArmControl.traj.ctrl.prismatic_z1_target;
+#endif
         }
+#if RotaryDJ_USE
         ArmControl.arm_motor.RotaryDJ->valSet.angle_deg = ArmControl.traj.ctrl.dj_target;
+#endif
         ArmControl.running = false;
         ArmControl.finish = true;
     }
 }
+#endif
 
 // 机械臂位置、模式初始化
 void Arm_Control_Init(void)
 {
+    s_arm_initialized = false;
     // 电机配置:把结构体成员指向真实电机对象
+#if RotaryU1_USE
     ArmControl.arm_motor.RotaryU1 = &Unitree_motors[0];
+#endif
+#if RotaryZ1_USE
     ArmControl.arm_motor.RotaryZ1 = &Zmotor[0];    // GIM4310
+#endif
+#if PrismaticZ1_USE
     ArmControl.arm_motor.PrismaticZ1 = &Zmotor[1]; // U8Lite
+#endif
+#if RotaryDJ_USE
     ArmControl.arm_motor.RotaryDJ = &DJmotor[1];
 
-    /*
-    ArmControl.arm_motor.RotaryU1->cmd.kp=;
-    ArmControl.arm_motor.RotaryU1->cmd.kd=;
-   */
     ArmControl.arm_motor.RotaryDJ->posPID.KP = 0.3F;
     ArmControl.arm_motor.RotaryDJ->posPID.KI = 0;
     ArmControl.arm_motor.RotaryDJ->posPID.KD = 0.009F;
     ArmControl.arm_motor.RotaryDJ->velPID.KP = 7.0F;
     ArmControl.arm_motor.RotaryDJ->velPID.KI = 0.3F;
     ArmControl.arm_motor.RotaryDJ->velPID.KD = 0.1F;
+#endif
 
+#if RotaryZ1_USE
     ArmControl.arm_motor.RotaryZ1->param.kpPos = 0.5F;
     ArmControl.arm_motor.RotaryZ1->param.kdPos = 0.1F;
 
     ArmControl.arm_motor.RotaryZ1->param.kpVel = 0.5F;
     ArmControl.arm_motor.RotaryZ1->param.kiVel = 0;
+#endif
 
+#if PrismaticZ1_USE
     ArmControl.arm_motor.PrismaticZ1->param.kpPos = 4.8F;
     ArmControl.arm_motor.PrismaticZ1->param.kdPos = 0.001F;
 
     ArmControl.arm_motor.PrismaticZ1->param.kpVel = 1.5F;
     ArmControl.arm_motor.PrismaticZ1->param.kiVel = 0;
+#endif
 
     ArmControl.enable = false;
     ArmControl.reset = false;
     ArmControl.state = ARM_STATE_SILENT;
     ArmControl.req_state = ARM_STATE_SILENT;
 
+#if RotaryZ1_USE
     ArmControl.end_quarter_turns = 0;
+#endif
     ArmControl.pose = Arm_Load_Pose(ARM_STATE_SILENT);
 
     ArmControl.traj.mode = ARM_MODE_DEFAULT;
 
+#if RotaryU1_USE
     ArmControl.traj.ctrl.u1_start = 0.0f;
+#endif
+#if RotaryZ1_USE
     ArmControl.traj.ctrl.rotary_z1_start = Arm_End_Target();
+#endif
+#if PrismaticZ1_USE
     ArmControl.traj.ctrl.prismatic_z1_start = 0.0f;
+#endif
+#if RotaryDJ_USE
     ArmControl.traj.ctrl.dj_start = 0.0f;
+#endif
 
     // 目标值与初始状态(SILENT)配置一致,保证首次非SILENT命令能触发目标变化沿
+#if RotaryU1_USE
     ArmControl.traj.ctrl.u1_target = Arm_Pose_Table[ARM_STATE_SILENT].u1;
+#endif
+#if RotaryZ1_USE
     ArmControl.traj.ctrl.rotary_z1_target = Arm_End_Target();
+#endif
+#if PrismaticZ1_USE
     ArmControl.traj.ctrl.prismatic_z1_target = Arm_Pose_Table[ARM_STATE_SILENT].prismatic_z1;
+#endif
+#if RotaryDJ_USE
     ArmControl.traj.ctrl.dj_target = Arm_Pose_Table[ARM_STATE_SILENT].dj;
+#endif
 
     ArmControl.traj.ctrl.time = 0.0f;
     ArmControl.traj.ctrl.total_time = ARM_MOVE_TIME;
     ArmControl.traj.ctrl.dt = ARM_INTERPOLATION_DT;
 
-#if (USE_FK && USE_IK)
+#if (ARM_USE_FK && ARM_USE_IK)
     ArmControl.traj.ctrl.start_x = 0.0f;
     ArmControl.traj.ctrl.start_y = 0.0f;
     ArmControl.traj.ctrl.target_x = 0.0f;
@@ -385,15 +631,18 @@ void Arm_Control_Init(void)
     ArmControl.finish = true; // 防止上电后立刻乱动
 
     Jaw_Init();
+    s_arm_initialized = true;
 }
 
 /* 仅三个独立末端旋转状态会更新理想离散角度。 */
+#if ARM_MOTORS_USE
 static bool Arm_Is_End_Rotation_State(ArmState_t state)
 {
     return (state == ARM_STATE_END_CW90) ||
            (state == ARM_STATE_END_CW180) ||
            (state == ARM_STATE_END_CCW90);
 }
+#endif
 
 // 机械臂运动更新(1kHz,运行于TIM2中断)
 // 1.使能沿收敛  2.复位则系统复位  3.夹爪继电器  4.未使能直接return
@@ -403,13 +652,34 @@ void Arm_Func(void)
     static uint8_t s_motor_enabled = 0;
 
     /* 0) 未完成初始化(电机引用为空)直接返回:TIM2在Arm_Control_Init之前就已启动 */
-    if (ArmControl.arm_motor.RotaryU1 == NULL ||
-        ArmControl.arm_motor.RotaryZ1 == NULL ||
-        ArmControl.arm_motor.PrismaticZ1 == NULL ||
-        ArmControl.arm_motor.RotaryDJ == NULL)
+    if (!s_arm_initialized)
     {
         return;
     }
+#if RotaryU1_USE
+    if (ArmControl.arm_motor.RotaryU1 == NULL)
+    {
+        return;
+    }
+#endif
+#if RotaryZ1_USE
+    if (ArmControl.arm_motor.RotaryZ1 == NULL)
+    {
+        return;
+    }
+#endif
+#if PrismaticZ1_USE
+    if (ArmControl.arm_motor.PrismaticZ1 == NULL)
+    {
+        return;
+    }
+#endif
+#if RotaryDJ_USE
+    if (ArmControl.arm_motor.RotaryDJ == NULL)
+    {
+        return;
+    }
+#endif
 
     /* 1) 使能判断:先收敛电机使能沿 */
     if (ArmControl.enable)
@@ -417,6 +687,7 @@ void Arm_Func(void)
         if (s_motor_enabled == 0)
         {
             Arm_Motor_Enable();
+
             s_motor_enabled = 1;
         }
     }
@@ -441,6 +712,7 @@ void Arm_Func(void)
     {
         return;
     }
+#if ARM_MOTORS_USE
     bool target_changed = false;
 
     /* 3) 模式切换变化沿检测:新状态目标与当前目标不同才重新规划 */
@@ -454,6 +726,7 @@ void Arm_Func(void)
         bool was_running = ArmControl.running;
 
         ArmControl.state = requested_state;
+#if RotaryZ1_USE
         if (rotation)
         {
             switch (requested_state)
@@ -471,13 +744,20 @@ void Arm_Func(void)
                 break;
             }
         }
+#endif
         pose = Arm_Load_Pose(requested_state);
         if (rotation)
         {
             // 保留上一段位置目标；只改变 GIM 的理想绝对角度。
+#if RotaryU1_USE
             pose.u1 = ArmControl.traj.ctrl.u1_target;
+#endif
+#if PrismaticZ1_USE
             pose.prismatic_z1 = ArmControl.traj.ctrl.prismatic_z1_target;
+#endif
+#if RotaryDJ_USE
             pose.dj = ArmControl.traj.ctrl.dj_target;
+#endif
             if (was_running)
             {
                 pose.move_time = fmaxf(ArmControl.traj.ctrl.total_time -
@@ -486,7 +766,7 @@ void Arm_Func(void)
             }
         }
 
-#if (USE_FK && USE_IK)
+#if (ARM_USE_FK && ARM_USE_IK)
         if (ArmControl.state == ARM_CartPos_DEBUG)
         {
             // 笛卡尔模式:末端目标坐标发生改变才启动
@@ -500,17 +780,24 @@ void Arm_Func(void)
         }
         else
 #endif
-    }
-    {
-        // 默认模式:四台电机转角目标值发生改变才启动
-        target_changed = (ArmControl.traj.mode != ARM_MODE_DEFAULT) ||
-                         (ArmControl.traj.ctrl.u1_target != pose.u1) ||
-                         (ArmControl.traj.ctrl.rotary_z1_target != pose.rotary_z1) ||
-                         (ArmControl.traj.ctrl.prismatic_z1_target != pose.prismatic_z1) ||
-                         (ArmControl.traj.ctrl.dj_target != pose.dj);
-        if (target_changed)
         {
-            Arm_Interpolation_Start(pose);
+            target_changed = (ArmControl.traj.mode != ARM_MODE_DEFAULT);
+#if RotaryU1_USE
+            target_changed = target_changed || (ArmControl.traj.ctrl.u1_target != pose.u1);
+#endif
+#if RotaryZ1_USE
+            target_changed = target_changed || (ArmControl.traj.ctrl.rotary_z1_target != pose.rotary_z1);
+#endif
+#if PrismaticZ1_USE
+            target_changed = target_changed || (ArmControl.traj.ctrl.prismatic_z1_target != pose.prismatic_z1);
+#endif
+#if RotaryDJ_USE
+            target_changed = target_changed || (ArmControl.traj.ctrl.dj_target != pose.dj);
+#endif
+            if (target_changed)
+            {
+                Arm_Interpolation_Start(pose);
+            }
         }
     }
     if (target_changed)
@@ -527,7 +814,7 @@ void Arm_Func(void)
         Arm_Interpolation_Update();
     }
 
-#if USE_FK
+#if ARM_USE_FK
     /* 运动学遥测(1kHz刷新,供VOFA/调试器观察) */
     Arm_Kinetics_Data.motor_target = Arm_Debug;
     Arm_Kinetics_Data.arm_angle.Angle1 = U1_Motor2Geom(ArmControl.arm_motor.RotaryU1->data.position);
@@ -537,35 +824,65 @@ void Arm_Func(void)
     Arm_Kinetics_Data.forward_angle.u2_theta = DEG2RAD(ArmControl.arm_motor.RotaryZ1->valReal.pos_deg); // TODO 第二关节暂按 GIM4310
     Arm_Kinetics_Data.end_coordinate = Forward(Arm_Kinetics_Data.forward_angle);
 #endif
-#if (USE_FK && USE_IK)
+#if (ARM_USE_FK && ARM_USE_IK)
     Arm_Kinetics_Data.inverse_angle = Inverse(Arm_Kinetics_Data.end_coordinate);
+#endif
+#endif
+#if !ARM_MOTORS_USE
+    if ((unsigned int)ArmControl.req_state < ARM_STATE_COUNT)
+    {
+        ArmControl.state = ArmControl.req_state;
+    }
+    ArmControl.running = false;
+    ArmControl.finish = true;
 #endif
 }
 
 void Arm_Motor_Enable(void)
 {
 
+#if RotaryU1_USE
     ArmControl.arm_motor.RotaryU1->enable = true;
+    ArmControl.arm_motor.RotaryU1->cmd.position=ArmControl.arm_motor.RotaryU1->data.position;
+#endif
 
+
+#if RotaryDJ_USE
     ArmControl.arm_motor.RotaryDJ->Begin = true;
     ArmControl.arm_motor.RotaryDJ->MODE_Set = DJ_Position;
+    ArmControl.arm_motor.RotaryDJ->valSet.angle_deg=ArmControl.arm_motor.RotaryDJ->valNow.angle_deg;
+#endif
 
+#if PrismaticZ1_USE
     ArmControl.arm_motor.PrismaticZ1->Begin = true;
     ArmControl.arm_motor.PrismaticZ1->mode = Zdrive_Postion;
+    ArmControl.arm_motor.PrismaticZ1->valSetNow.pos_deg=ArmControl.arm_motor.PrismaticZ1->valReal.pos_deg;
+#endif
 
+#if RotaryZ1_USE
     ArmControl.arm_motor.RotaryZ1->Begin = true;
     ArmControl.arm_motor.RotaryZ1->mode = Zdrive_Postion;
+    ArmControl.arm_motor.RotaryZ1->valSetNow.pos_deg=ArmControl.arm_motor.RotaryZ1->valReal.pos_deg;
+#endif
 }
 
 void Arm_Motor_Disable(void)
 {
+#if RotaryU1_USE
     ArmControl.arm_motor.RotaryU1->enable = false;
+#endif
 
+#if RotaryDJ_USE
     ArmControl.arm_motor.RotaryDJ->MODE_Set = DJ_Disable;
     ArmControl.arm_motor.RotaryDJ->Begin = false;
+#endif
 
+#if RotaryZ1_USE
     ArmControl.arm_motor.RotaryZ1->mode = Zdrive_Disable;
+#endif
+#if PrismaticZ1_USE
     ArmControl.arm_motor.PrismaticZ1->mode = Zdrive_Disable;
+#endif
 }
 
 // 状态命令表:主控板下发 CANID -> 机械臂请求状态
