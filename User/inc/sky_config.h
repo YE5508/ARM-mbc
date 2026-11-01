@@ -16,7 +16,7 @@
 #define RotaryU1_USE    1
 #define RotaryDJ_USE    1
 #define RotaryZ1_USE    1
-#define PrismaticZ1_USE 1
+#define PrismaticZ1_USE 0
 
 #define USE_FK 0
 #define USE_IK 0
